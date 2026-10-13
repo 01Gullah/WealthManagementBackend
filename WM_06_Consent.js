@@ -5,6 +5,7 @@
  * Rules in Platform_Rules:
  *   CONSENT_VERSION: bump (v1 -> v2) to force everyone to consent again.
  *   CONSENT_MODE: EVERY_INVESTMENT (default) or ONCE_PER_VERSION.
+ * Placeholders in text: {MIN_AGE}, {FEE}, {FORFEIT} (filled on the server, so the record matches what the customer saw).
  */
 
 var CONSENT_TAB = 'Consents';
@@ -17,13 +18,13 @@ var DEFAULT_CONSENT_ = [
   [2, 'SECTION', 'Your responsibility', 'You are solely responsible for your investment decisions, the accuracy of the information you provide, and the security of your account and password.', 'TRUE'],
   [3, 'SECTION', 'Risk', 'All investing involves risk, including loss of some or all of your principal. Projected or illustrative returns are hypothetical, are not guarantees, and past performance does not predict future results.', 'TRUE'],
   [4, 'SECTION', 'No advice', 'Nothing on this platform is financial, investment, tax or legal advice. Consider speaking with a qualified professional before investing.', 'TRUE'],
-  [5, 'SECTION', 'Withdrawals', "Withdrawing before a plan's maturity date returns your principal only. Returns are paid only at maturity.", 'TRUE'],
+  [5, 'SECTION', 'Withdrawals', "Withdrawing before a plan's maturity date means {FORFEIT}, and a fee of {FEE}% is deducted. Our team reviews every request before anything is paid.", 'TRUE'],
   [6, 'SECTION', 'Funds you use', 'You confirm the funds you use are lawfully yours and not from any unlawful source.', 'TRUE'],
   [7, 'SECTION', 'Terms and Privacy', 'By continuing you agree to the Terms of Service and Privacy Policy.', 'TRUE'],
   [8, 'CHECKBOX', '', 'I am at least {MIN_AGE} years old.', 'TRUE'],
   [9, 'CHECKBOX', '', 'I am fully responsible for my own investment decisions and my account.', 'TRUE'],
   [10, 'CHECKBOX', '', 'I understand I can lose money, and returns are not guaranteed.', 'TRUE'],
-  [11, 'CHECKBOX', '', 'I understand early withdrawal returns principal only, and I agree to the Terms and Privacy Policy.', 'TRUE']
+  [11, 'CHECKBOX', '', 'I understand that if I withdraw early, {FORFEIT}, a {FEE}% fee applies, and I may receive less than I paid in. I agree to the Terms and Privacy Policy.', 'TRUE']
 ];
 
 function dd_(list) {
@@ -38,8 +39,8 @@ function getConsentSheet_(ss) {
   var sh = ss.getSheetByName(CONSENT_TAB);
   if (!sh) {
     sh = ss.insertSheet(CONSENT_TAB);
-    sh.appendRow(['Timestamp', 'Email', 'Version', 'MinAge', 'Note', 'Statements', 'Used', 'UsedFor']);
-    sh.getRange(1, 1, 1, 8).setFontWeight('bold');
+    sh.appendRow(['Timestamp', 'Email', 'Version', 'MinAge', 'Note', 'Statements', 'Used', 'UsedFor', 'Wording']);
+    sh.getRange(1, 1, 1, 9).setFontWeight('bold');
     sh.setFrozenRows(1);
   }
   if (!String(sh.getRange(1, 6).getValue())) {
@@ -50,6 +51,9 @@ function getConsentSheet_(ss) {
     sh.getRange(1, 8).setValue('UsedFor').setFontWeight('bold');
     var last = sh.getLastRow();
     if (last > 1) sh.getRange(2, 7, last - 1, 1).setValue('LEGACY');
+  }
+  if (!String(sh.getRange(1, 9).getValue())) {
+    sh.getRange(1, 9).setValue('Wording').setFontWeight('bold');
   }
   return sh;
 }
@@ -157,7 +161,18 @@ function consumeConsent_(ss, email, detail) {
   return true;
 }
 
+/** Fills {MIN_AGE}, {FEE} and {FORFEIT}. Same values the customer sees. */
+function fillConsentTokens_(text, minAge, tk) {
+  var out = String(text).replace(/\{MIN_AGE\}/g, String(minAge));
+  if (tk && tk.success) {
+    out = out.replace(/\{FEE\}/g, String(tk.fee)).replace(/\{FORFEIT\}/g, String(tk.forfeit));
+  }
+  return out;
+}
+
 function readConsentItems_(ss, minAge) {
+  var tk = null;
+  try { tk = getTermTokens(); } catch (e) { tk = null; }
   var vals = getConsentTextSheet_(ss).getDataRange().getValues();
   var sections = [], checks = [];
   for (var i = 1; i < vals.length; i++) {
@@ -167,8 +182,8 @@ function readConsentItems_(ss, minAge) {
     var text = String(vals[i][3]).trim();
     var active = String(vals[i][4]).trim().toUpperCase() === 'TRUE';
     if (!active || !text || !isFinite(no)) continue;
-    text = text.replace(/\{MIN_AGE\}/g, String(minAge));
-    title = title.replace(/\{MIN_AGE\}/g, String(minAge));
+    text = fillConsentTokens_(text, minAge, tk);
+    title = fillConsentTokens_(title, minAge, tk);
     var item = { no: no, title: title, text: text };
     if (type === 'SECTION') sections.push(item);
     else if (type === 'CHECKBOX') checks.push(item);
@@ -228,8 +243,11 @@ function recordConsent(token) {
       var minAge = cfg.success ? cfg.minAge : 18;
       var items = readConsentItems_(ss, minAge);
       var stmts = items.checks.map(function (c) { return c.no + '. ' + c.text; }).join(' | ');
+      var wording = items.sections.map(function (c) {
+        return c.no + '. ' + (c.title ? c.title + ': ' : '') + c.text;
+      }).join(' | ');
       getConsentSheet_(ss).appendRow([new Date(), s.email, getConsentVersion_(ss), minAge,
-        'All statements ticked and accepted. Mode: ' + mode, stmts, '', '']);
+        'All statements ticked and accepted. Mode: ' + mode, stmts, '', '', wording]);
     }
     return { success: true };
   } catch (err) {
@@ -239,4 +257,3 @@ function recordConsent(token) {
     if (locked) { try { lock.releaseLock(); } catch (e) {} }
   }
 }
-
