@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Apex Admin</title>
+<style>
+:root{--card:#070b1b;--card2:#040714;--line:#131a2e;--mint:#10b981;--mint2:#34d399;--mut:#8b93a8;--dim:#5b647a;--red:#fb7185}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:#03061a;color:#fff;font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif}
+body{padding:16px 14px calc(40px + env(safe-area-inset-bottom))}
+h1{font-size:22px;margin:4px 0 14px}
+h2{font-size:14px;letter-spacing:1.4px;text-transform:uppercase;color:var(--mut);margin:22px 0 10px}
+button{font-family:inherit;cursor:pointer}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:12px}
+input,select,textarea{width:100%;padding:13px;margin-bottom:10px;border-radius:12px;border:1px solid var(--line);background:var(--card2);color:#fff;font-size:16px;font-family:inherit}
+textarea{min-height:110px;resize:vertical}
+label{display:block;font-size:11px;letter-spacing:1.2px;text-transform:uppercase;color:var(--mut);margin:2px 0 6px}
+.go{width:100%;height:48px;border:none;border-radius:14px;background:#00c27f;color:#03130d;font-weight:800;font-size:16px}
+.sm{padding:9px 14px;border-radius:10px;border:1px solid var(--mint);background:transparent;color:var(--mint2);font-weight:700;font-size:13px}
+.msg{min-height:20px;font-size:14px;margin:6px 0}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.cnt{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px}
+.cnt b{display:block;font-size:24px;color:var(--mint2)}
+.cnt span{font-size:11px;color:var(--mut);letter-spacing:1px;text-transform:uppercase}
+.row{display:flex;justify-content:space-between;gap:8px;font-size:13px;color:var(--mut);margin-top:6px}
+.em{font-weight:700;color:#fff;word-break:break-all;font-size:14px}
+.warn{background:#3b2a05;color:#fcd34d;border-radius:12px;padding:10px 12px;font-size:12px;line-height:1.5;margin-bottom:10px}
+.top{display:flex;justify-content:space-between;align-items:center}
+.tabs{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;margin-bottom:10px}
+.tabs button{flex:0 0 auto;padding:10px 16px;border-radius:12px;border:1px solid var(--line);background:var(--card2);color:var(--mut);font-weight:700;font-size:14px}
+.tabs button.on{border-color:var(--mint);color:var(--mint2);background:#062622}
+.rov{background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:10px;color:#cfd6e6;font-size:14px;line-height:1.5;word-break:break-word;min-height:20px}
+.cm{min-height:18px;font-size:13px;margin-top:8px}
+.note{color:var(--mut);font-size:13px;line-height:1.55;margin-bottom:12px}
+.tag{display:inline-block;margin-left:6px;padding:2px 8px;border-radius:8px;background:#062622;color:#34d399;font-size:10px;font-weight:800;letter-spacing:.6px}
+</style>
+</head>
+<body>
+<div id="login">
+  <h1>Apex Admin</h1>
+  <div class="card">
+    <input type="email" id="em" placeholder="Admin email" autocomplete="email">
+    <input type="password" id="pw" placeholder="Password" autocomplete="current-password">
+    <div class="msg" id="lm"></div>
+    <button class="go" id="lg">Sign in</button>
+  </div>
+</div>
+
+<div id="app" style="display:none">
+  <div class="top"><h1>Apex Admin</h1><button class="sm" id="out">Sign out</button></div>
+  <div class="tabs" id="tabs">
+    <button data-t="OV" class="on">Overview</button>
+    <button data-t="RULES">Rules</button>
+    <button data-t="PRODUCTS">Products</button>
+    <button data-t="BANNERS">Banners</button>
+    <button data-t="CHOICES">Choices</button>
+    <button data-t="CONSENT">Consent</button>
+    <button data-t="LEGAL">Legal</button>
+    <button data-t="AUDIT">Audit Log</button>
+  </div>
+
+  <div id="ov">
+    <div class="grid" id="counts"></div>
+    <div class="msg" id="am"></div>
+
+    <h2 id="payH">Payment orders</h2>
+    <div class="warn" id="payWarn">TEST MODE: orders are test orders and no real money moves. A plan confirms only when the server processes a verified payment event.</div>
+    <div id="pays"></div>
+
+    <h2>Gift credit</h2>
+    <div class="card">
+      <div class="note" style="margin-bottom:10px">Adds money to a customer's balance as a labelled line. It earns returns on the plan and term you pick. All choices come from the Products and Choices tabs.</div>
+      <label>Customer</label>
+      <select id="gUser"></select>
+      <label>Amount (USD)</label>
+      <select id="gAmt"></select>
+      <label>Plan (sets the return rate)</label>
+      <select id="gProd"></select>
+      <label>Term (months)</label>
+      <select id="gTerm"></select>
+      <label>Label shown to the customer</label>
+      <select id="gFlag"></select>
+      <button class="sm" id="gGo">Add gift</button>
+      <div class="cm" id="gMsg"></div>
+    </div>
+
+    <h2 id="wdH">Withdrawal requests</h2>
+    <div class="warn">Accepting closes the plan and removes it from the customer's balance. This system sends NO money. Pay the customer separately. Rejecting puts the plan back to normal.</div>
+    <div id="wds"></div>
+
+    <h2>Plan requests</h2>
+    <div class="warn">Setting CONFIRMED by hand is for testing only. In production, only a verified payment event may confirm a plan. For a gift, REJECTED reverses it.</div>
+    <div id="reqs"></div>
+    <h2>Users</h2>
+    <div id="users"></div>
+  </div>
+
+  <div id="ct" style="display:none">
+    <h2 id="ctTitle"></h2>
+    <div class="note" id="ctNote"></div>
+    <div id="addWrap"></div>
+    <div id="ctList"></div>
+  </div>
+</div>
+
+<script>
+function $(i){ return document.getElementById(i); }
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function say(id,t,ok){ var e=$(id); e.textContent=t; e.style.color=ok?'#34d399':'#fb7185'; }
+function fmt(n){ return '$'+Number(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+var KEY='apex_admin', tok='', cur='OV', curData=null;
+var PAY_FINAL=['CONFIRMED','OVERPAID','UNDERPAID','EXPIRED','FAILED'];
+try{ tok=localStorage.getItem(KEY)||''; }catch(e){}
+function save(t){ tok=t||''; try{ if(t) localStorage.setItem(KEY,t); else localStorage.removeItem(KEY); }catch(e){} }
+function showLogin(m){ $('app').style.display='none'; $('login').style.display='block'; if(m) say('lm',m,false); }
+function authFail(r){ if(r && r.message==='Not authorized.'){ save(''); showLogin('Please sign in as an administrator.'); return true; } return false; }
+function opts(list){ var o=''; for(var i=0;i<list.length;i++) o+='<option>'+esc(list[i])+'</option>'; return o; }
+
+/* ---------- OVERVIEW ---------- */
+function renderOv(r){
+  $('login').style.display='none'; $('app').style.display='block';
+  var c=r.counts;
+  $('counts').innerHTML=
+    '<div class="cnt"><b>'+c.users+'</b><span>Users</span></div>'+
+    '<div class="cnt"><b>'+c.requests+'</b><span>Requests</span></div>'+
+    '<div class="cnt"><b>'+c.pending+'</b><span>Pending</span></div>'+
+    '<div class="cnt"><b>'+c.confirmed+'</b><span>Confirmed</span></div>';
+
+  var emails=r.users.map(function(u){ return u.email; });
+  $('gUser').innerHTML=emails.length?opts(emails):'<option value="">No users</option>';
+  $('gAmt').innerHTML=opts(r.giftAmounts||[]);
+  $('gTerm').innerHTML=opts(r.giftTerms||[]);
+  $('gFlag').innerHTML=opts(r.giftFlags||[]);
+  var po='', gp=r.giftProducts||[];
+  for(var q=0;q<gp.length;q++) po+='<option value="'+esc(gp[q].id)+'">'+esc(gp[q].name)+' ('+Math.round(gp[q].apy*10000)/100+'%)</option>';
+  $('gProd').innerHTML=po||'<option value="">No plans</option>';
+
+  var sandbox=(r.payMode==='SANDBOX');
+  $('payH').textContent='Payment orders ('+(r.payOpen||0)+' open)';
+  $('payWarn').textContent=sandbox
+    ? 'TEST MODE: orders are test orders and no real money moves. Use the dropdown to simulate what a payment provider would report. A plan confirms only when the server processes a payment event.'
+    : 'LIVE mode: orders can only be changed by a verified provider event. Simulation is off.';
+  var pl=r.payments||[], ph='';
+  for(var k=0;k<pl.length;k++){
+    var z=pl[k], fin=PAY_FINAL.indexOf(z.status)>=0;
+    ph+='<div class="card"><div class="em">'+esc(z.ref)+'<span class="tag">'+esc(z.status)+'</span></div>'+
+       '<div class="row"><span>'+esc(z.email)+'</span><span>'+esc(z.method)+'</span></div>'+
+       '<div class="row"><span>Expected '+fmt(z.expected)+'</span><span>Received '+fmt(z.received)+'</span></div>'+
+       '<div class="row"><span>'+esc(z.date)+'</span><span></span></div>'+
+       (z.note?'<div class="rov" style="margin:8px 0 0">'+esc(z.note)+'</div>':'');
+    if(sandbox && !fin){
+      ph+='<select style="margin-top:10px">'+opts(r.payOutcomes||[])+'</select>'+
+          '<button class="sm sim" data-ref="'+esc(z.ref)+'">Simulate provider event</button>';
+    }
+    ph+='</div>';
+  }
+  $('pays').innerHTML=ph||'<div class="card">No payment orders yet.</div>';
+
+  $('wdH').textContent='Withdrawal requests ('+(r.wdProcessing||0)+' processing)';
+  var wl=r.withdrawals||[], wh='';
+  for(var w=0;w<wl.length;w++){
+    var y=wl[w];
+    wh+='<div class="card"><div class="em">'+esc(y.email)+'</div>'+
+       '<div class="row"><span>'+esc(y.plan)+'</span><span>'+fmt(y.amount)+'</span></div>'+
+       '<div class="row"><span>Value when requested</span><span>'+fmt(y.value)+'</span></div>'+
+       '<div class="row"><span>'+(y.early?'EARLY &middot; fee '+y.feePct+'% ('+fmt(y.fee)+')'+(y.forfeit?' &middot; returns lost':''):'At maturity')+'</span><span>Payout '+fmt(y.payout)+'</span></div>'+
+       '<div class="row"><span>'+esc(y.date)+'</span><span>Row '+y.row+'</span></div>'+
+       '<select>'+
+       ['PROCESSING','ACCEPTED','REJECTED'].map(function(s){ return '<option'+(s===y.status?' selected':'')+'>'+s+'</option>'; }).join('')+
+       '</select>'+
+       '<button class="sm ws" data-row="'+y.row+'" data-email="'+esc(y.email)+'">Save decision</button></div>';
+  }
+  $('wds').innerHTML=wh||'<div class="card">No withdrawal requests yet.</div>';
+
+  var h='';
+  for(var i=0;i<r.requests.length;i++){
+    var x=r.requests[i];
+    var gift=(x.kind==='GIFT');
+    h+='<div class="card"><div class="em">'+esc(x.email)+(gift?'<span class="tag">GIFT'+(x.flag?' &middot; '+esc(x.flag):'')+'</span>':'')+'</div>'+
+       '<div class="row"><span>'+esc(x.product)+' &middot; '+x.months+' mo</span><span>'+fmt(x.amount)+'</span></div>'+
+       '<div class="row"><span>'+esc(x.date)+'</span><span>Row '+x.row+'</span></div>'+
+       '<select data-row="'+x.row+'">'+
+       ['PENDING','CONFIRMED','REJECTED'].map(function(s){ return '<option'+(s===x.status?' selected':'')+'>'+s+'</option>'; }).join('')+
+       '</select>'+
+       '<button class="sm st" data-row="'+x.row+'" data-email="'+esc(x.email)+'">Save status</button></div>';
+  }
+  $('reqs').innerHTML=h||'<div class="card">No requests yet.</div>';
+  var u='';
+  for(var j=0;j<r.users.length;j++){
+    var us=r.users[j];
+    u+='<div class="card"><div class="em">'+esc(us.email)+'</div>'+
+       '<div class="row"><span>Joined '+esc(us.created)+'</span><span>'+fmt(us.balance)+'</span></div>'+
+       '<button class="sm ul" style="margin-top:10px" data-email="'+esc(us.email)+'">Clear login lock</button></div>';
+  }
+  $('users').innerHTML=u||'<div class="card">No users.</div>';
+}
+function loadOv(){
+  if(!tok){ showLogin(); return; }
+  google.script.run
+    .withSuccessHandler(function(r){
+      if(r&&r.success) renderOv(r);
+      else { save(''); showLogin('This account is not signed in as an administrator.'); }
+    })
+    .withFailureHandler(function(){ showLogin('Connection error.'); })
+    .adminOverview(tok);
+}
+
+/* ---------- CONTENT EDITOR ---------- */
+function fieldHtml(sp, v, i, isNew){
+  var ro = sp.ro || (sp.roExisting && !isNew);
+  var lab = '<label>'+esc(sp.n)+'</label>';
+  v = (v===undefined||v===null)?'':String(v);
+  if(ro) return lab+'<div class="rov">'+esc(v)+'</div><input type="hidden" data-i="'+i+'" value="'+esc(v)+'">';
+  if(sp.k==='select'){
+    var o='';
+    for(var a=0;a<sp.opts.length;a++) o+='<option'+(sp.opts[a]===v?' selected':'')+'>'+esc(sp.opts[a])+'</option>';
+    return lab+'<select data-i="'+i+'">'+o+'</select>';
+  }
+  if(sp.k==='area') return lab+'<textarea data-i="'+i+'">'+esc(v)+'</textarea>';
+  if(sp.k==='number') return lab+'<input type="number" inputmode="numeric" data-i="'+i+'" value="'+esc(v)+'" placeholder="'+sp.min+' to '+sp.max+'">';
+  return lab+'<input type="text" data-i="'+i+'" value="'+esc(v)+'">';
+}
+function cardHtml(specs, vals, isNew, attrs){
+  var h='<div class="card" '+attrs+'>';
+  for(var i=0;i<specs.length;i++) h+=fieldHtml(specs[i], vals[i], i, isNew);
+  h+='<button class="sm '+(isNew?'ad':'sv')+'">'+(isNew?'Add':'Save')+'</button><div class="cm"></div></div>';
+  return h;
+}
+function collect(card){
+  var els=card.querySelectorAll('[data-i]'), out=[];
+  for(var i=0;i<els.length;i++) out[Number(els[i].getAttribute('data-i'))]=els[i].value;
+  return out;
+}
+function renderTab(r){
+  curData=r;
+  $('ctTitle').textContent=r.label;
+  $('ctNote').textContent=r.note;
+  var add='';
+  if(r.addable){
+    add='<button class="sm" id="addToggle" style="margin-bottom:12px">+ Add new</button>'+
+        '<div id="addForm" style="display:none">'+cardHtml(r.cols, r.cols.map(function(){return '';}), true, 'data-new="1"')+'</div>';
+  }
+  $('addWrap').innerHTML=add;
+  var h='';
+  for(var i=0;i<r.rows.length;i++){
+    var x=r.rows[i];
+    h+=cardHtml(x.spec||r.cols, x.vals, false, 'data-row="'+x.row+'" data-check="'+esc(x.vals[0])+'"');
+  }
+  $('ctList').innerHTML=h||'<div class="card">Nothing here yet.</div>';
+  $('ctList').style.opacity='1';
+}
+function loadTab(key){
+  $('ctList').innerHTML='<div class="note">Loading...</div>'; $('addWrap').innerHTML='';
+  $('ctTitle').textContent=''; $('ctNote').textContent='';
+  google.script.run
+    .withSuccessHandler(function(r){
+      if(r&&r.success && cur===key) renderTab(r);
+      else if(!authFail(r)) $('ctList').innerHTML='<div class="note" style="color:#fb7185">'+esc((r&&r.message)||'Could not load.')+'</div>';
+    })
+    .withFailureHandler(function(){ $('ctList').innerHTML='<div class="note" style="color:#fb7185">Connection error.</div>'; })
+    .adminGetContent(tok,key);
+}
+
+/* ---------- AUDIT LOG (read only) ---------- */
+function renderAudit(r){
+  $('ctTitle').textContent='Audit Log';
+  $('ctNote').textContent='The latest 100 admin actions, newest first. This list is read only.';
+  $('addWrap').innerHTML='<button class="sm" id="auditRef" style="margin-bottom:12px">Refresh</button>';
+  var h='';
+  for(var i=0;i<r.rows.length;i++){
+    var x=r.rows[i];
+    h+='<div class="card"><div class="em">'+esc(x.action)+(x.target?' &middot; '+esc(x.target):'')+'</div>'+
+       '<div class="row"><span>'+esc(x.ts)+'</span><span>'+esc(x.admin)+'</span></div>'+
+       (x.detail?'<div class="rov" style="margin:8px 0 0">'+esc(x.detail)+'</div>':'')+'</div>';
+  }
+  $('ctList').innerHTML=h||'<div class="card">No admin actions yet.</div>';
+}
+function loadAudit(){
+  $('ctList').innerHTML='<div class="note">Loading...</div>'; $('addWrap').innerHTML='';
+  $('ctTitle').textContent=''; $('ctNote').textContent='';
+  google.script.run
+    .withSuccessHandler(function(r){
+      if(cur!=='AUDIT') return;
+      if(r&&r.success) renderAudit(r);
+      else if(!authFail(r)) $('ctList').innerHTML='<div class="note" style="color:#fb7185">'+esc((r&&r.message)||'Could not load.')+'</div>';
+    })
+    .withFailureHandler(function(){ $('ctList').innerHTML='<div class="note" style="color:#fb7185">Connection error.</div>'; })
+    .adminGetAudit(tok);
+}
+
+$('tabs').addEventListener('click',function(ev){
+  var b=ev.target.closest?ev.target.closest('button'):null;
+  if(!b) return;
+  var t=b.getAttribute('data-t');
+  var bs=$('tabs').getElementsByTagName('button');
+  for(var i=0;i<bs.length;i++) bs[i].className=(bs[i]===b)?'on':'';
+  cur=t;
+  if(t==='OV'){ $('ct').style.display='none'; $('ov').style.display='block'; loadOv(); }
+  else {
+    $('ov').style.display='none'; $('ct').style.display='block';
+    if(t==='AUDIT') loadAudit(); else loadTab(t);
+  }
+});
+
+$('ct').addEventListener('click',function(ev){
+  var b=ev.target.closest?ev.target.closest('button'):null;
+  if(!b) return;
+  if(b.id==='auditRef'){ loadAudit(); return; }
+  if(b.id==='addToggle'){ var f=$('addForm'); f.style.display=(f.style.display==='none')?'block':'none'; return; }
+  var card=b.closest('.card'), cm=card?card.querySelector('.cm'):null;
+  if(!card||!cm) return;
+  if(b.className.indexOf('sv')>=0){
+    b.disabled=true; cm.style.color='#34d399'; cm.textContent='Saving...';
+    google.script.run
+      .withSuccessHandler(function(r){
+        b.disabled=false;
+        if(authFail(r)) return;
+        cm.style.color=(r&&r.success)?'#34d399':'#fb7185';
+        cm.textContent=(r&&r.message)||'Failed.';
+        if(r&&r.success&&r.check!==undefined) card.setAttribute('data-check',r.check);
+      })
+      .withFailureHandler(function(){ b.disabled=false; cm.style.color='#fb7185'; cm.textContent='Connection error.'; })
+      .adminSaveRow(tok,cur,card.getAttribute('data-row'),card.getAttribute('data-check'),collect(card));
+  } else if(b.className.indexOf('ad')>=0){
+    b.disabled=true; cm.style.color='#34d399'; cm.textContent='Adding...';
+    google.script.run
+      .withSuccessHandler(function(r){
+        b.disabled=false;
+        if(authFail(r)) return;
+        if(r&&r.success){ loadTab(cur); }
+        else { cm.style.color='#fb7185'; cm.textContent=(r&&r.message)||'Failed.'; }
+      })
+      .withFailureHandler(function(){ b.disabled=false; cm.style.color='#fb7185'; cm.textContent='Connection error.'; })
+      .adminAddRow(tok,cur,collect(card));
+  }
+});
+
+/* ---------- LOGIN / OVERVIEW ACTIONS ---------- */
+$('lg').addEventListener('click',function(){
+  var e=$('em').value.trim(), p=$('pw').value;
+  if(!e||!p){ say('lm','Enter email and password.',false); return; }
+  $('lg').disabled=true; say('lm','Signing in...',true);
+  google.script.run
+    .withSuccessHandler(function(r){
+      $('lg').disabled=false; $('pw').value='';
+      if(r&&r.success&&r.token){ save(r.token); say('lm','',true); cur='OV'; loadOv(); }
+      else say('lm',(r&&r.message)||'Sign-in failed.',false);
+    })
+    .withFailureHandler(function(){ $('lg').disabled=false; say('lm','Connection error.',false); })
+    .loginUser({email:e,password:p});
+});
+
+$('out').addEventListener('click',function(){
+  var t=tok; save('');
+  try{ google.script.run.withFailureHandler(function(){}).logoutUser(t); }catch(e){}
+  showLogin();
+});
+
+$('pays').addEventListener('click',function(ev){
+  var b=ev.target.closest?ev.target.closest('button.sim'):null;
+  if(!b) return;
+  var sel=b.parentNode.getElementsByTagName('select')[0];
+  var ref=b.getAttribute('data-ref');
+  if(!confirm('Simulate "'+sel.value+'" for order '+ref+'? This is a TEST event.')) return;
+  b.disabled=true; say('am','Working...',true);
+  google.script.run
+    .withSuccessHandler(function(r){
+      b.disabled=false;
+      if(authFail(r)) return;
+      say('am',(r&&r.message)||'Failed.',!!(r&&r.success));
+      if(r&&r.success) loadOv();
+    })
+    .withFailureHandler(function(){ b.disabled=false; say('am','Connection error.',false); })
+    .adminSimulatePayment(tok,ref,sel.value);
+});
+
+$('gGo').addEventListener('click',function(){
+  var u=$('gUser').value, a=$('gAmt').value, f=$('gFlag').value, p=$('gProd').value, t=$('gTerm').value;
+  if(!u||!a||!f||!p||!t){ say('gMsg','Pick a customer, amount, plan, term and label.',false); return; }
+  var pn=$('gProd').options[$('gProd').selectedIndex].text;
+  if(!confirm('Give $'+a+' to '+u+'\nPlan: '+pn+'\nTerm: '+t+' months\nLabel: '+f+'\n\nThis earns returns like an investment.')) return;
+  var b=$('gGo'); b.disabled=true; say('gMsg','Adding...',true);
+  google.script.run
+    .withSuccessHandler(function(r){
+      b.disabled=false;
+      if(authFail(r)) return;
+      say('gMsg',(r&&r.message)||'Failed.',!!(r&&r.success));
+      if(r&&r.success) loadOv();
+    })
+    .withFailureHandler(function(){ b.disabled=false; say('gMsg','Connection error.',false); })
+    .adminGiftCredit(tok,u,a,f,p,t);
+});
+
+$('wds').addEventListener('click',function(ev){
+  var b=ev.target.closest?ev.target.closest('button.ws'):null;
+  if(!b) return;
+  var sel=b.parentNode.getElementsByTagName('select')[0];
+  if(sel.value==='ACCEPTED' && !confirm('Accept this withdrawal? The plan closes and leaves the customer balance. No money is sent by this system.')) return;
+  b.disabled=true; say('am','Saving...',true);
+  google.script.run
+    .withSuccessHandler(function(r){
+      b.disabled=false;
+      if(authFail(r)) return;
+      say('am',(r&&r.message)||'Failed.',!!(r&&r.success));
+      if(r&&r.success) loadOv();
+    })
+    .withFailureHandler(function(){ b.disabled=false; say('am','Connection error.',false); })
+    .adminSetWithdrawal(tok,b.getAttribute('data-row'),b.getAttribute('data-email'),sel.value);
+});
+
+$('reqs').addEventListener('click',function(ev){
+  var b=ev.target.closest?ev.target.closest('button.st'):null;
+  if(!b) return;
+  var sel=b.parentNode.getElementsByTagName('select')[0];
+  b.disabled=true; say('am','Saving...',true);
+  google.script.run
+    .withSuccessHandler(function(r){ b.disabled=false; say('am',(r&&r.message)||'Failed.',!!(r&&r.success)); if(r&&r.success) loadOv(); })
+    .withFailureHandler(function(){ b.disabled=false; say('am','Connection error.',false); })
+    .adminSetStatus(tok,b.getAttribute('data-row'),b.getAttribute('data-email'),sel.value);
+});
+
+$('users').addEventListener('click',function(ev){
+  var b=ev.target.closest?ev.target.closest('button.ul'):null;
+  if(!b) return;
+  b.disabled=true; say('am','Working...',true);
+  google.script.run
+    .withSuccessHandler(function(r){ b.disabled=false; say('am',(r&&r.message)||'Failed.',!!(r&&r.success)); })
+    .withFailureHandler(function(){ b.disabled=false; say('am','Connection error.',false); })
+    .adminUnlockUser(tok,b.getAttribute('data-email'));
+});
+
+loadOv();
+</script>
+</body>
+</html>
