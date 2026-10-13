@@ -2,6 +2,7 @@
  * WM_07_Legal.gs
  * Apex Wealth - Terms of Service and Privacy Policy, editable from the Sheet.
  * Tab: Legal_Pages (Page | No | Type | Text | Active)
+ * Placeholders in text: {FEE}, {FORFEIT} (filled from Platform_Rules via getTermTokens).
  * STARTER TEXT ONLY. Must be reviewed and replaced by a qualified attorney before launch.
  */
 
@@ -19,7 +20,7 @@ var DEFAULT_LEGAL_ = [
   ['TERMS', 9, 'HEADING', 'No advice', 'TRUE'],
   ['TERMS', 10, 'PARAGRAPH', 'Nothing on this platform is financial, investment, tax or legal advice. Consider speaking with a qualified professional before making decisions.', 'TRUE'],
   ['TERMS', 11, 'HEADING', 'Plans and withdrawals', 'TRUE'],
-  ['TERMS', 12, 'PARAGRAPH', "Withdrawing before a plan's maturity date returns your principal only. Returns, if any, are paid only at maturity. Terms for each plan are shown before you confirm it.", 'TRUE'],
+  ['TERMS', 12, 'PARAGRAPH', "Withdrawing before a plan's maturity date means {FORFEIT}, and a fee of {FEE}% is deducted, so you may receive less than you paid in. Returns, if any, are paid only at maturity. Every withdrawal request is reviewed by our team before anything is paid. Terms for each plan are shown before you confirm it.", 'TRUE'],
   ['TERMS', 13, 'HEADING', 'Lawful use', 'TRUE'],
   ['TERMS', 14, 'PARAGRAPH', 'You confirm that any funds you use are lawfully yours. We may request identity verification and may suspend or close accounts to meet legal obligations.', 'TRUE'],
   ['TERMS', 15, 'HEADING', 'Changes and contact', 'TRUE'],
@@ -79,12 +80,14 @@ function setupLegal() {
   return 'Legal setup OK';
 }
 
-/** Public: returns the active items of one page (TERMS or PRIVACY), in order. */
+/** Public: returns the active items of one page (TERMS or PRIVACY), in order, with {FEE}/{FORFEIT} filled. */
 function getLegalPage(page) {
   try {
     page = String(page || '').toUpperCase();
     if (page !== 'TERMS' && page !== 'PRIVACY') return { success: false, message: 'Page not found.' };
     var ss = getRegistrySheet_().getParent();
+    var tk = null;
+    try { tk = getTermTokens(); } catch (e) { tk = null; }
     var vals = getLegalSheet_(ss).getDataRange().getValues();
     var items = [];
     for (var i = 1; i < vals.length; i++) {
@@ -93,6 +96,9 @@ function getLegalPage(page) {
       var no = Number(vals[i][1]);
       var text = String(vals[i][3]).trim();
       if (!text || !isFinite(no)) continue;
+      if (tk && tk.success) {
+        text = text.replace(/\{FEE\}/g, String(tk.fee)).replace(/\{FORFEIT\}/g, String(tk.forfeit));
+      }
       items.push({ no: no, type: String(vals[i][2]).trim().toUpperCase() === 'HEADING' ? 'HEADING' : 'PARAGRAPH', text: text });
     }
     items.sort(function (a, b) { return a.no - b.no; });
