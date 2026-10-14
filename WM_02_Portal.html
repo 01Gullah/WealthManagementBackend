@@ -536,6 +536,53 @@ function loadToken(){
 }
 function clearToken(){ memToken = ''; try { localStorage.removeItem(TOKEN_KEY); } catch(e){} }
 
+/* ---------- REMEMBER WHERE YOU WERE (survives a Safari page reload) ---------- */
+var WL_KEY = 'apex_wl';
+var SCROLL_KEY = 'apex_scroll';
+var WL_MAX_AGE = 30 * 60 * 1000;
+var resumed = false;
+var wlOpenRow = 0;
+
+function wlSave(){
+  if (!wlOpenRow) return;
+  try { localStorage.setItem(WL_KEY, JSON.stringify({row: wlOpenRow, tx: $('wlTx').value, t: Date.now()})); } catch(e){}
+}
+function wlForget(){
+  wlOpenRow = 0;
+  try { localStorage.removeItem(WL_KEY); } catch(e){}
+}
+function saveScroll(){
+  try {
+    var y = window.pageYOffset || document.documentElement.scrollTop || 0;
+    localStorage.setItem(SCROLL_KEY, JSON.stringify({y: y, t: Date.now()}));
+  } catch(e){}
+}
+function restoreScroll(){
+  try {
+    var raw = localStorage.getItem(SCROLL_KEY);
+    if (!raw) return;
+    var s = JSON.parse(raw);
+    localStorage.removeItem(SCROLL_KEY);
+    if (!s || Date.now() - s.t > WL_MAX_AGE || !(s.y > 0)) return;
+    setTimeout(function(){ window.scrollTo(0, s.y); }, 250);
+  } catch(e){}
+}
+function resumeWallet(){
+  if (resumed || !loggedIn) return;
+  resumed = true;
+  try {
+    var raw = localStorage.getItem(WL_KEY);
+    if (!raw) return;
+    var s = JSON.parse(raw);
+    if (!s || !s.row || Date.now() - s.t > WL_MAX_AGE){ wlForget(); return; }
+    openWallet(Number(s.row), String(s.tx || ''));
+  } catch(e){ wlForget(); }
+}
+window.addEventListener('pagehide', saveScroll);
+document.addEventListener('visibilitychange', function(){
+  if (document.visibilityState === 'hidden'){ saveScroll(); wlSave(); }
+});
+
 /* ---------- MENU ---------- */
 $('burger').addEventListener('click', function(){ $('menu').classList.toggle('open'); });
 var links = document.getElementsByClassName('mlink');
@@ -740,7 +787,7 @@ function payInfo(p){
 }
 
 function wlBtn(row){
-  return '<button class="btn wlbtn" data-row="' + row + '">Pay / submit transaction hash</button>';
+  return '<button class="btn wlbtn wlopen" data-row="' + row + '">Pay / submit transaction hash</button>';
 }
 
 function renderRequests(list){
@@ -831,7 +878,11 @@ function refreshAccount(cb){
   if (!t || !hasBackend()) return;
   google.script.run
     .withSuccessHandler(function(res){
-      if (res && res.success){ showAccount(res); if (cb) cb(res); }
+      if (res && res.success){
+        showAccount(res);
+        if (!resumed){ restoreScroll(); resumeWallet(); }
+        if (cb) cb(res);
+      }
     })
     .withFailureHandler(function(){})
     .getAccount(t);
@@ -840,11 +891,14 @@ function refreshAccount(cb){
 function logout(){
   var t = loadToken();
   clearToken();
+  wlForget();
+  try { localStorage.removeItem(SCROLL_KEY); } catch(e){}
   loggedIn = false;
   lastPlans = [];
   try { if (t && hasBackend()) google.script.run.withFailureHandler(function(){}).logoutUser(t); } catch(e){}
   $('dash').style.display = 'none';
   $('pd').style.display = 'none';
+  $('wl').classList.remove('open');
   $('menuAuth').style.display = 'flex';
   $('menuOut').style.display = 'none';
   $('menu').classList.remove('open');
@@ -1186,23 +1240,26 @@ $('gPay').addEventListener('click', function(){
 
 /* ---------- PAY / SUBMIT TRANSACTION HASH (test mode wallet flow) ---------- */
 var wlRow = 0;
-function openWallet(row){
+function openWallet(row, prefillTx){
   var t = loadToken();
   if (!t || !hasBackend()){ openAuth('login'); return; }
   wlRow = row;
+  wlOpenRow = row;
   $('wlSub').textContent = 'Loading...';
   $('wlTag').style.display = 'none';
   $('wlBody').style.display = 'none';
   $('wlGo').style.display = 'none';
   $('wlGo').disabled = false;
-  $('wlTx').value = '';
+  $('wlTx').value = prefillTx || '';
   $('wlMsg').textContent = '';
   $('wl').classList.add('open');
+  wlSave();
   google.script.run
     .withSuccessHandler(function(r){
       if (!r || !r.success){
         $('wlSub').textContent = '';
         say('wlMsg', (r && r.message) || 'Could not load payment details.', false);
+        wlForget();
         return;
       }
       $('wlSub').textContent = 'Follow the steps below, then submit your transaction hash.';
@@ -1219,6 +1276,7 @@ function openWallet(row){
     .withFailureHandler(function(){ $('wlSub').textContent = ''; say('wlMsg', 'Connection error.', false); })
     .getWalletInstructions(t, row);
 }
+$('wlTx').addEventListener('input', wlSave);
 $('wlGo').addEventListener('click', function(){
   var t = loadToken();
   if (!t || !hasBackend()){ say('wlMsg', 'Please sign in again.', false); return; }
@@ -1229,6 +1287,7 @@ $('wlGo').addEventListener('click', function(){
     .withSuccessHandler(function(r){
       if (r && r.success){
         say('wlMsg', r.message, true);
+        wlForget();
         refreshAccount();
         setTimeout(function(){ $('wl').classList.remove('open'); }, 1600);
       } else {
@@ -1239,10 +1298,10 @@ $('wlGo').addEventListener('click', function(){
     .withFailureHandler(function(){ $('wlGo').disabled = false; say('wlMsg', 'Connection error.', false); })
     .submitTxid(t, wlRow, tx);
 });
-$('wlClose').addEventListener('click', function(){ $('wl').classList.remove('open'); });
+$('wlClose').addEventListener('click', function(){ wlForget(); $('wl').classList.remove('open'); });
 function bindWl(id){
   $(id).addEventListener('click', function(ev){
-    var b = ev.target.closest ? ev.target.closest('.wlbtn') : null;
+    var b = ev.target.closest ? ev.target.closest('.wlopen') : null;
     if (!b) return;
     openWallet(Number(b.getAttribute('data-row')));
   });
