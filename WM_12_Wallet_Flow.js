@@ -4,9 +4,10 @@
  * Tab: Wallet_Submissions
  * Columns: Timestamp | Email | SourceRow | Asset | Amount | Txid | Status | Reviewer | ReviewedAt | Note
  * Status: SUBMITTED / APPROVED / REJECTED
- * SAFETY LOCK: real wallet addresses are never shown, and approvals only work in test mode,
+ * SAFETY: real wallet addresses are never shown, and approvals only work while PAYMENT_MODE is SANDBOX,
  * unless WALLET_LIVE_ENABLED_ is changed to true in this file AND PAYMENT_MODE is LIVE.
- * A customer-supplied txid is never proof of payment. Approval here is a manual, logged decision.
+ * A customer-supplied txid is never proof of payment. Approval is a manual, logged TEST decision and
+ * goes through processPaymentEvent_ (WM_10), the only place a plan can be confirmed.
  */
 
 var WALLET_TAB = 'Wallet_Submissions';
@@ -60,7 +61,13 @@ function walletIsLive_(ss) {
   return (WALLET_LIVE_ENABLED_ === true && mode === 'LIVE');
 }
 
-/** Returns the instructions for one of the customer's own pending requests. */
+function walletIsSandbox_(ss) {
+  var mode = 'SANDBOX';
+  try { mode = String(readRules_(ss).PAYMENT_MODE || 'SANDBOX').trim().toUpperCase(); } catch (e) {}
+  return mode !== 'LIVE';
+}
+
+/** Instructions for one of the customer's own pending requests. */
 function getWalletInstructions(token, row) {
   try {
     var s = restoreSession(token);
@@ -75,6 +82,12 @@ function getWalletInstructions(token, row) {
     if (String(r[7] || '').trim().toUpperCase() === 'GIFT') return { success: false, message: 'Not a payable request.' };
     if (String(r[6] || 'PENDING').trim().toUpperCase() !== 'PENDING') return { success: false, message: 'This request is not awaiting payment.' };
 
+    var pm = payMap_(ss, s.email)[row];
+    if (!pm) return { success: false, message: 'No payment order exists for this request.' };
+    if (PAY_FINAL_.indexOf(pm.status) >= 0) {
+      return { success: false, message: 'This order is ' + pm.status.toLowerCase() + '. Please start a new plan.' };
+    }
+
     var live = walletIsLive_(ss);
     var address = TEST_ADDRESS_;
     if (live) {
@@ -82,7 +95,7 @@ function getWalletInstructions(token, row) {
       if (!/^0x[a-fA-F0-9]{40}$/.test(address)) return { success: false, message: 'Payment details are not available right now.' };
     }
     return {
-      success: true, test: !live, address: address,
+      success: true, test: !live, address: address, ref: pm.ref,
       asset: 'USDT (ERC-20)', amount: (Number(r[3]) || 0).toFixed(2),
       note: live ? 'Send the exact amount, then submit your transaction hash.'
                  : 'TEST MODE: this is not a real address. Do not send any funds.'
@@ -93,7 +106,7 @@ function getWalletInstructions(token, row) {
   }
 }
 
-/** Customer submits a transaction hash. This is a claim for review, not proof of payment. */
+/** Customer submits a transaction hash. A claim for review, not proof of payment. */
 function submitTxid(token, row, txid) {
   var lock = LockService.getScriptLock();
   var locked = false;
@@ -158,13 +171,11 @@ function adminListWallet(token) {
   }
 }
 
-/** Admin decision. APPROVED confirms the plan, so it is allowed in TEST MODE only unless the lock is lifted. */
-function adminDecideWallet(token, subRow, decision, note) {
+/** Core decision. APPROVED feeds processPaymentEvent_ (SANDBOX only). Not exposed to the browser. */
+function decideWallet_(adminEmail, subRow, decision, note) {
   var lock = LockService.getScriptLock();
   var locked = false;
   try {
-    var adm = requireAdmin_(token);
-    if (!adm) return { success: false, message: 'Not authorized.' };
     decision = String(decision || '').toUpperCase();
     if (['APPROVED', 'REJECTED'].indexOf(decision) < 0) return { success: false, message: 'Invalid decision.' };
     note = String(note || '').substring(0, 200);
@@ -179,41 +190,71 @@ function adminDecideWallet(token, subRow, decision, note) {
     var sub = ws.getRange(subRow, 1, 1, 10).getValues()[0];
     if (String(sub[6]).trim().toUpperCase() !== 'SUBMITTED') return { success: false, message: 'Already decided.' };
 
+    var resultMsg = 'Rejected.';
     if (decision === 'APPROVED') {
-      if (walletIsLive_(ss)) {
-        return { success: false, message: 'Approval in live mode needs verified on-chain payment, which is not built.' };
+      if (walletIsLive_(ss) || !walletIsSandbox_(ss)) {
+        return { success: false, message: 'Approval is test-mode only. Live payments need a verified provider event, which is not built.' };
       }
-      var live = getLiveSheet_(ss);
+      var email = String(sub[1]).trim().toLowerCase();
       var src = Number(sub[2]);
+      var live = getLiveSheet_(ss);
       if (!isFinite(src) || src < 2 || src > live.getLastRow()) return { success: false, message: 'Plan row not found.' };
-      if (String(live.getRange(src, 2).getValue()).trim().toLowerCase() !== String(sub[1]).trim().toLowerCase()) {
+      if (String(live.getRange(src, 2).getValue()).trim().toLowerCase() !== email) {
         return { success: false, message: 'Plan row does not match the customer.' };
       }
-      live.getRange(src, 7).setValue('CONFIRMED');
+      var pm = payMap_(ss, email)[src];
+      if (!pm) return { success: false, message: 'No payment order exists for this plan.' };
+      var amount = Number(live.getRange(src, 4).getValue()) || 0;
+      var res = processPaymentEvent_(ss, pm.ref, { kind: 'paid', amount: amount, providerRef: String(sub[5]), source: 'ADMIN_TEST_WALLET' });
+      if (!res.success || res.duplicate) return { success: false, message: res.message || 'Order could not be processed.' };
+      if (res.status !== 'CONFIRMED' && res.status !== 'OVERPAID') return { success: false, message: 'Order ended as ' + res.status + '.' };
+      resultMsg = 'Approved (test mode). Plan confirmed.';
     }
-    ws.getRange(subRow, 7, 1, 4).setValues([[decision, adm.email, new Date(), note || String(sub[9] || '')]]);
-    logAdmin_(adm.email, 'WALLET_' + decision, String(sub[1]), 'submission row ' + subRow + ' plan row ' + sub[2]);
-    return { success: true, message: decision === 'APPROVED' ? 'Approved (test mode). Plan confirmed.' : 'Rejected.' };
+    ws.getRange(subRow, 7, 1, 4).setValues([[decision, adminEmail, new Date(), note || String(sub[9] || '')]]);
+    logAdmin_(adminEmail, 'WALLET_' + decision, String(sub[1]), 'submission row ' + subRow + ' plan row ' + sub[2]);
+    return { success: true, message: resultMsg };
   } catch (err) {
-    Logger.log('adminDecideWallet error: ' + err);
+    Logger.log('decideWallet_ error: ' + err);
     return { success: false, message: 'Server error.' };
   } finally {
     if (locked) { try { lock.releaseLock(); } catch (e) {} }
   }
 }
 
-/** Editor test: files a fake submission for the newest non-gift request so you can see the tab. */
+/** Admin (browser): approve or reject a submission. */
+function adminDecideWallet(token, subRow, decision, note) {
+  var adm = requireAdmin_(token);
+  if (!adm) return { success: false, message: 'Not authorized.' };
+  return decideWallet_(adm.email, subRow, decision, note);
+}
+
+/** Editor test: files a fake submission for the newest non-gift request that has a pending order. */
 function walletTestSubmission() {
   var ss = getRegistrySheet_().getParent();
   var live = getLiveSheet_(ss);
   for (var r = live.getLastRow(); r >= 2; r--) {
     var row = live.getRange(r, 1, 1, 9).getValues()[0];
     if (String(row[7] || '').trim().toUpperCase() === 'GIFT') continue;
-    var fake = '0x' + Utilities.getUuid().replace(/-/g, '') + Utilities.getUuid().replace(/-/g, '');
+    if (String(row[6] || 'PENDING').trim().toUpperCase() !== 'PENDING') continue;
+    var fake = ('0x' + Utilities.getUuid().replace(/-/g, '') + Utilities.getUuid().replace(/-/g, '')).substring(0, 66);
     getWalletSheet_(ss).appendRow([new Date(), String(row[1]), r, 'USDT (ERC-20)', (Number(row[3]) || 0).toFixed(2),
-      fake.substring(0, 66), 'SUBMITTED', '', '', 'TEST MODE (editor test)']);
+      fake, 'SUBMITTED', '', '', 'TEST MODE (editor test)']);
     Logger.log('Test submission added for row ' + r);
     return 'Test submission added';
   }
-  return 'No plan requests found';
+  return 'No pending plan requests found';
+}
+
+/** Editor test: approves the newest SUBMITTED hash through the safe path. */
+function walletTestApprove() {
+  var ss = getRegistrySheet_().getParent();
+  var ws = getWalletSheet_(ss);
+  for (var r = ws.getLastRow(); r >= 2; r--) {
+    if (String(ws.getRange(r, 7).getValue()).trim().toUpperCase() === 'SUBMITTED') {
+      var res = decideWallet_('EDITOR_TEST', r, 'APPROVED', 'Editor test approval');
+      Logger.log(JSON.stringify(res));
+      return res.message;
+    }
+  }
+  return 'No SUBMITTED hash found';
 }
