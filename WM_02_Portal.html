@@ -1,0 +1,1436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Apex Wealth</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#03061a;--card:#070b1b;--card2:#040714;--line:#131a2e;
+  --mint:#10b981;--mint2:#34d399;--txt:#ffffff;--mut:#8b93a8;--dim:#5b647a;--red:#fb7185;--blue:#4f8cff;
+  --sans:'Inter',-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif;
+  --mono:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0;background:#03061a;color:#fff;font-family:var(--sans);min-height:100%}
+body{padding-bottom:calc(40px + env(safe-area-inset-bottom))}
+button{font-family:inherit;cursor:pointer}
+svg{display:block}
+
+.banner{display:none;background:#3b2a05;color:#fcd34d;border-bottom:1px solid #6b4a0a;
+  padding:10px 16px;font-size:13px;font-weight:600;text-align:center;line-height:1.4}
+
+.nav{position:sticky;top:0;z-index:30;background:rgba(3,6,26,.92);
+  -webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--line);padding-top:env(safe-area-inset-top)}
+.nav-in{display:flex;align-items:center;justify-content:space-between;padding:14px 16px}
+.brand{display:flex;align-items:center;gap:12px;font-weight:800;font-size:19px;letter-spacing:.2px}
+.logo{width:32px;height:32px;border-radius:9px;background:linear-gradient(135deg,#34d399,#10b981);
+  display:flex;align-items:center;justify-content:center;color:#03130d}
+.burger{background:none;border:none;color:#9aa3b8;padding:6px}
+.menu{display:none;position:absolute;left:0;right:0;top:100%;background:#060a1a;
+  border-bottom:1px solid var(--line);padding:10px 16px 16px}
+.menu.open{display:block}
+.menu a{display:block;color:#e5e7eb;font-size:16px;font-weight:600;padding:14px 4px;
+  border-bottom:1px solid var(--line);text-decoration:none}
+.menu .mrow{display:flex;gap:10px;margin-top:14px}
+.menu .mrow button{flex:1}
+
+.btn{padding:13px 16px;border-radius:14px;border:1px solid var(--mint);background:transparent;
+  color:var(--mint);font-weight:700;font-size:15px}
+.btn.fill{background:var(--mint);color:#03130d}
+.wlbtn{margin-top:10px;width:100%;padding:9px;font-size:13px}
+
+.dash{display:none;margin:16px 16px 0;background:var(--card);border:1px solid var(--mint);border-radius:20px;padding:16px}
+.dash .top{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.dash small{display:block;color:var(--mut);font-size:12px;margin-bottom:2px;word-break:break-all}
+.dash .bal{font-family:var(--mono);font-size:26px;color:var(--mint2);font-weight:500}
+.dash .btn{padding:9px 14px;font-size:13px}
+.dgo{margin-top:14px;width:100%;height:46px;border:none;border-radius:12px;background:#00c27f;color:#03130d;font-weight:800;font-size:15px}
+.plans-h{margin:16px 0 8px;font-family:var(--mono);font-size:12px;letter-spacing:1.5px;color:var(--mut);text-transform:uppercase}
+.plan{background:var(--card2);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-bottom:10px}
+.plan .r1{display:flex;justify-content:space-between;font-weight:700;font-size:15px}
+.plan .r2{display:flex;justify-content:space-between;color:var(--mut);font-size:12.5px;margin-top:6px;font-family:var(--mono)}
+.plan .st{font-size:11px;font-weight:800;letter-spacing:1px;color:#fcd34d}
+.plan .st.ok{color:var(--mint2)}
+.plan .st.bad{color:var(--red)}
+.wdopt{cursor:pointer;color:#fff}
+.wdopt:active{border-color:var(--mint)}
+.flag{display:inline-block;margin-left:8px;padding:2px 8px;border-radius:8px;background:#062622;color:#34d399;
+  font-size:10.5px;font-weight:800;letter-spacing:.6px;vertical-align:middle}
+.empty{color:var(--dim);font-size:13px;padding:6px 2px}
+
+.pd{display:none;margin:16px 16px 0;background:linear-gradient(180deg,#0c1426,#08101f);
+  border:1px solid var(--line);border-radius:22px;padding:18px 14px 16px}
+.pdtop{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:6px}
+.pdtop small{color:var(--mut);font-size:12px;word-break:break-all}
+.pdtop .btn{padding:8px 12px;font-size:12px}
+.pdtag{display:none;background:#3b2a05;color:#fcd34d;font-size:11px;font-weight:700;line-height:1.4;
+  padding:8px 10px;border-radius:10px;margin:8px 0 4px;text-align:center}
+.pdtitle{margin:14px 0 8px;text-align:center;font-size:30px;font-weight:800;letter-spacing:-.8px;
+  background:linear-gradient(90deg,#5b9bff,#a770ff);-webkit-background-clip:text;background-clip:text;
+  color:transparent;-webkit-text-fill-color:transparent}
+.pdsub{color:#c3cbe0;text-align:center;font-size:14px;line-height:1.5;margin:0 8px 18px}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
+.stat{background:#0e1830;border:1px solid #243153;border-radius:16px;padding:14px}
+.stat .sh{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.stat .sl{font-size:11px;letter-spacing:1px;color:#9aa6c4;text-transform:uppercase;font-weight:600}
+.stat .si{width:34px;height:34px;border-radius:10px;background:#16264a;color:#7fb0ff;
+  display:flex;align-items:center;justify-content:center;flex:0 0 34px}
+.stat .sv{font-family:var(--mono);font-size:20px;font-weight:700;margin:14px 0 8px;letter-spacing:-.5px;word-break:break-all}
+.stat .sd{font-size:11.5px;color:var(--mint2)}
+.pcard{background:#0b1427;border:1px solid #243153;border-radius:16px;padding:16px;margin-bottom:14px}
+.pcard h4{margin:0 0 4px;font-size:17px;font-weight:700}
+.pcard .ps{color:#9aa6c4;font-size:12.5px;margin:0 0 14px;line-height:1.5}
+.qa{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.qa button{height:74px;border-radius:12px;border:1px solid #2f3d63;background:#0e1830;color:#fff;
+  font-weight:600;font-size:13px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px}
+.qa button.pri{background:linear-gradient(135deg,#3f7bff,#6aa3ff);border-color:#5b95ff}
+.qa button.off{opacity:.5}
+.vh{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.vh h4{margin:0}
+.al{margin-bottom:12px}
+.al .ar{display:flex;justify-content:space-between;font-size:12.5px;color:#c3cbe0;margin-bottom:6px}
+.al .bar{height:8px;background:#121b33;border-radius:6px;overflow:hidden}
+.al .fill{height:100%;border-radius:6px}
+#pdMsg{font-size:13px;min-height:18px;margin:2px 4px 8px;text-align:center;line-height:1.5}
+
+.hero{text-align:center;padding:64px 16px 8px}
+.hero h1{margin:0;font-weight:800;font-size:clamp(30px,8.6vw,44px);line-height:1.04;letter-spacing:-1.2px}
+.grad{background:linear-gradient(90deg,#34d399,#6ee7b7 55%,#34d399);
+  -webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent}
+.hero p{color:var(--mut);font-size:17px;line-height:1.65;margin:26px 4px 34px}
+.cta{width:calc(100% - 32px);margin:0 16px;height:54px;border-radius:16px;border:none;background:#fff;
+  color:#05070f;font-weight:800;font-size:17px;display:flex;align-items:center;justify-content:center;gap:10px}
+
+.ticker{display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:56px 24px 8px}
+.tick{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:18px 16px}
+.tick .top{display:flex;justify-content:space-between;align-items:center;
+  font-size:12px;font-weight:700;letter-spacing:1.4px;color:var(--mut);text-transform:uppercase}
+.tick .top span:last-child{font-family:var(--mono);font-weight:500;letter-spacing:1px}
+.tick .pr{font-family:var(--mono);font-size:21px;font-weight:500;margin:12px 0 10px;white-space:nowrap}
+.tick .ch{font-family:var(--mono);font-size:14px;font-weight:700}
+.up{color:var(--mint2)}.dn{color:var(--red)}
+
+.features{padding:48px 16px 8px;display:grid;gap:16px}
+.feat{background:var(--card);border:1px solid var(--line);border-radius:24px;padding:24px}
+.ico{width:48px;height:48px;border-radius:14px;background:#06211f;color:#10d99a;
+  display:flex;align-items:center;justify-content:center;margin-bottom:22px}
+.feat h3{margin:0 0 14px;font-size:21px;font-weight:800;letter-spacing:-.3px}
+.feat p{margin:0;color:#7b86a0;font-size:15.5px;line-height:1.65}
+
+.calc{margin:48px 0 0;padding:44px 18px 22px;border:1px solid var(--line);border-radius:30px;
+  background:radial-gradient(120% 60% at 50% 0%,rgba(16,185,129,.07),rgba(3,6,26,0) 70%),#050917}
+.calc h2{margin:0 0 12px;text-align:center;font-size:30px;line-height:1.15;font-weight:800;letter-spacing:-.8px}
+.calc .sub{text-align:center;color:var(--mut);font-size:16px;line-height:1.55;margin:0 8px 38px}
+.lbl{display:flex;justify-content:space-between;align-items:baseline;margin:0 0 14px;
+  font-family:var(--mono);font-size:13px;font-weight:700;letter-spacing:1.6px;color:#8b93a8;text-transform:uppercase}
+.lbl b{color:var(--mint2);font-size:20px;font-weight:500;letter-spacing:.5px;text-transform:none}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:30px;background:transparent;margin:0;outline:none}
+input[type=range]::-webkit-slider-runnable-track{height:14px;background:#03050f;border-radius:8px}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:48px;height:30px;border-radius:15px;
+  background:#fff;margin-top:-8px;box-shadow:0 2px 8px rgba(0,0,0,.5)}
+input[type=range]::-moz-range-track{height:14px;background:#03050f;border-radius:8px}
+input[type=range]::-moz-range-thumb{width:48px;height:30px;border-radius:15px;background:#fff;border:none}
+.scale{display:flex;justify-content:space-between;font-family:var(--mono);font-size:13px;color:var(--dim);margin:6px 0 34px}
+.sect{font-family:var(--mono);font-size:14px;font-weight:700;letter-spacing:1.6px;color:#8b93a8;
+  text-transform:uppercase;margin:0 0 14px}
+.risk{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:34px}
+.risk button{background:#040714;border:1px solid var(--line);border-radius:14px;padding:14px 4px;color:#fff}
+.risk button b{display:block;font-size:15px;font-weight:700;margin-bottom:4px}
+.risk button span{font-family:var(--mono);font-size:13px;color:var(--mut)}
+.risk button.on{border-color:var(--mint);background:#062622}
+.risk button.on b{color:var(--mint2)}
+.result{background:var(--card2);border:1px solid var(--line);border-radius:26px;padding:26px 24px 24px}
+.result .k{font-size:13px;font-weight:700;letter-spacing:1.8px;color:var(--mut);text-transform:uppercase}
+.result .big{font-family:var(--mono);font-size:clamp(32px,9.6vw,42px);font-weight:500;margin:14px 0 24px;letter-spacing:-1px}
+.split{border-top:1px solid var(--line);padding-top:22px;display:flex;justify-content:space-between;gap:12px;margin-bottom:26px}
+.split small{display:block;color:var(--mut);font-size:15px;margin-bottom:10px}
+.split div b{font-family:var(--mono);font-size:21px;font-weight:500}
+.split .g{color:var(--mint2)}
+.go{width:100%;height:58px;border:none;border-radius:18px;background:#00c27f;color:#03130d;font-weight:800;
+  font-size:18px;display:flex;align-items:center;justify-content:center;gap:10px}
+.go:disabled{opacity:.45}
+.note{color:#6b7488;font-size:12px;text-align:center;margin:18px 12px 0;line-height:1.55}
+
+.foot{margin:44px 16px 0;padding-top:26px;border-top:1px solid var(--line);text-align:center;color:var(--dim);font-size:13px;line-height:1.6}
+.fbrand{font-weight:800;letter-spacing:1.5px;color:var(--mut);font-size:14px;margin-bottom:12px}
+.flinks{margin-bottom:14px}
+.foot a{color:var(--mut);margin:0 12px;text-decoration:underline;display:inline-block;padding:6px 0}
+.ftext{margin:0 6px 14px;font-size:12px;color:#6b7488;line-height:1.55}
+.fcopy{font-size:12px}
+
+.modal{display:none;position:fixed;inset:0;z-index:60;background:rgba(1,3,12,.82);
+  align-items:flex-start;justify-content:center;padding:16px;overflow-y:auto}
+.modal.open{display:flex}
+.box{width:100%;max-width:400px;background:#070b1b;border:1px solid var(--line);border-radius:24px;padding:22px;margin:auto 0}
+.box h3{margin:0 0 6px;font-size:22px;font-weight:800}
+.box .gsub{color:var(--mut);font-size:13.5px;line-height:1.5;margin:0 0 16px}
+.tabs{display:flex;gap:8px;margin-bottom:16px}
+.tabs button{flex:1;padding:12px;border-radius:12px;border:1px solid var(--line);background:#040714;color:var(--mut);font-weight:700;font-size:15px}
+.tabs button.on{border-color:var(--mint);color:var(--mint2);background:#062622}
+.box input[type=text],.box input[type=email],.box input[type=password],.box input[type=number],.box select{
+  width:100%;padding:15px;margin-bottom:12px;border-radius:12px;border:1px solid var(--line);
+  background:#040714;color:#fff;font-size:16px;font-family:var(--sans);outline:none}
+.box input:focus,.box select:focus{border-color:var(--mint)}
+.hint{display:none;color:var(--dim);font-size:12.5px;line-height:1.5;margin:-2px 2px 12px}
+.msg{min-height:20px;font-size:14px;margin-bottom:12px;line-height:1.5}
+.box .go{height:52px;font-size:16px}
+.cancel{background:none;border:none;color:var(--mut);width:100%;padding:14px;margin-top:4px;font-size:15px}
+.flab{font-family:var(--mono);font-size:11.5px;letter-spacing:1.4px;color:var(--mut);text-transform:uppercase;margin:0 0 8px}
+.gproj{background:#040714;border:1px solid var(--mint);border-radius:16px;padding:14px;margin-bottom:14px;text-align:center}
+.gproj .big{font-family:var(--mono);font-size:28px;color:#fff;margin:4px 0}
+.gproj .g{font-family:var(--mono);color:var(--mint2);font-size:15px}
+.gproj small{color:var(--mut);font-size:12px}
+
+.legal{background:#040714;border:1px solid var(--line);border-radius:14px;padding:12px 14px;
+  max-height:170px;overflow-y:auto;font-size:12.5px;line-height:1.6;color:#aab2c5;margin-bottom:14px}
+.legal p{margin:0 0 8px}
+.chk{display:flex;gap:12px;align-items:flex-start;margin-bottom:12px;font-size:13.5px;line-height:1.5;color:#e5e7eb}
+.chk input{width:22px;height:22px;flex:0 0 22px;margin:1px 0 0;accent-color:#10b981}
+.lk{font-size:13px;color:var(--dim);margin:0 0 12px}
+.lk a{color:var(--mint2);text-decoration:underline;margin-right:14px}
+
+.lgb{max-height:62vh;overflow-y:auto;font-size:13.5px;line-height:1.65;color:#aab2c5;margin-bottom:14px}
+.lgb h4{color:#fff;margin:16px 0 6px;font-size:15px}
+.lgb h4:first-child{margin-top:0}
+.lgb p{margin:0 0 10px}
+
+.addr{background:#040714;border:1px dashed var(--mint);border-radius:12px;padding:12px;font-family:var(--mono);
+  font-size:12.5px;word-break:break-all;color:#fff;margin-bottom:12px;line-height:1.5}
+.wlrow{display:flex;justify-content:space-between;gap:10px;color:var(--mut);font-size:13px;margin-bottom:10px}
+.wlrow b{color:#fff;font-family:var(--mono)}
+
+#err{display:none;background:#7f1d1d;color:#fff;padding:10px 14px;font-size:12px;word-break:break-word}
+</style>
+</head>
+<body>
+<div id="err"></div>
+<div class="banner" id="banner"></div>
+
+<header class="nav">
+  <div class="nav-in">
+    <div class="brand">
+      <div class="logo">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/></svg>
+      </div>
+      APEX WEALTH
+    </div>
+    <button class="burger" id="burger" aria-label="Menu">
+      <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>
+    </button>
+  </div>
+  <div class="menu" id="menu">
+    <a href="#features" class="mlink">Features</a>
+    <a href="#calculator" class="mlink">Calculator</a>
+    <div class="mrow" id="menuAuth">
+      <button class="btn" id="mSign">Sign In</button>
+      <button class="btn fill" id="mReg">Register</button>
+    </div>
+    <div class="mrow" id="menuOut" style="display:none">
+      <button class="btn" id="mOut">Sign Out</button>
+    </div>
+  </div>
+</header>
+
+<div class="dash" id="dash">
+  <div class="top">
+    <div>
+      <small id="pEmail">Account</small>
+      <div class="bal" id="pBal">$0.00</div>
+    </div>
+    <button class="btn" id="pOut">Sign Out</button>
+  </div>
+  <button class="dgo" id="dGo">Start a savings plan</button>
+  <div class="plans-h">My Requests</div>
+  <div id="reqList"><div class="empty">No requests yet. Tap Start a savings plan.</div></div>
+</div>
+
+<div class="pd" id="pd">
+  <div class="pdtop">
+    <small id="pdEmail">Account</small>
+    <button class="btn" id="pdOut">Sign Out</button>
+  </div>
+  <div class="pdtag" id="pdTag">TEST MODE: figures are calculated from plan requests. No payment has been received.</div>
+  <h2 class="pdtitle">Portfolio Dashboard</h2>
+  <p class="pdsub">Welcome back! Here's your portfolio overview and plan performance.</p>
+
+  <div class="stats">
+    <div class="stat">
+      <div class="sh"><span class="sl">Total Balance</span>
+        <span class="si"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="2" x2="12" y2="22"/><path d="M17 6H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span></div>
+      <div class="sv" id="stBal">$0.00</div>
+      <div class="sd" id="stBalD">Principal + accrued</div>
+    </div>
+    <div class="stat">
+      <div class="sh"><span class="sl">Total Profit</span>
+        <span class="si"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg></span></div>
+      <div class="sv" id="stProfit">$0.00</div>
+      <div class="sd" id="stProfitD">+0.0%</div>
+    </div>
+    <div class="stat">
+      <div class="sh"><span class="sl">Active Plans</span>
+        <span class="si"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></span></div>
+      <div class="sv" id="stActive">0</div>
+      <div class="sd" id="stActiveD">of 0 total</div>
+    </div>
+    <div class="stat">
+      <div class="sh"><span class="sl">Next Maturity</span>
+        <span class="si"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span></div>
+      <div class="sv" id="stNext" style="font-size:16px">None</div>
+      <div class="sd" id="stNextD">&nbsp;</div>
+    </div>
+  </div>
+
+  <div class="pcard">
+    <h4>Quick Actions</h4>
+    <p class="ps">Manage your portfolio with these essential tools</p>
+    <div class="qa">
+      <button class="pri" id="qNew"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>New Plan</button>
+      <button id="qWd"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>Withdraw</button>
+      <button id="qCalc"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="11" x2="8" y2="11"/><line x1="12" y1="11" x2="12" y2="11"/><line x1="16" y1="11" x2="16" y2="11"/></svg>Calculator</button>
+      <button class="pri" id="qRef"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.5 15a9 9 0 1 1-2.1-9.4L23 10"/></svg>Refresh</button>
+    </div>
+    <div id="pdMsg"></div>
+  </div>
+
+  <div class="pcard">
+    <div class="vh"><h4>My Plans</h4></div>
+    <div id="pdPlans"></div>
+  </div>
+
+  <div class="pcard" style="margin-bottom:0">
+    <h4>Portfolio Allocation</h4>
+    <p class="ps">Share of your principal by risk profile</p>
+    <div id="pdAlloc"></div>
+  </div>
+</div>
+
+<section class="hero">
+  <h1>The Simple &amp; Transparent <span class="grad">Digital Wealth Platform</span></h1>
+  <p>Plan your savings with clear terms, illustrative projections and simple withdrawal requests. Every plan shows its term, rate and early-withdrawal rules before you confirm.</p>
+</section>
+<button class="cta" id="cta1">Get Started Now
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+</button>
+
+<section class="ticker" id="ticker"></section>
+
+<section class="features" id="features">
+  <div class="feat">
+    <div class="ico"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/></svg></div>
+    <h3>Clear Risk Disclosure</h3>
+    <p>All investing involves risk, including loss of principal. Read each plan's terms, rate and early-withdrawal rules carefully before you confirm.</p>
+  </div>
+  <div class="feat">
+    <div class="ico"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg></div>
+    <h3>Transparent Plans</h3>
+    <p>Rates shown are illustrative and are not guaranteed. Projections are estimates only and actual results may be lower, or you may lose money.</p>
+  </div>
+  <div class="feat">
+    <div class="ico"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="7" r="4"/><path d="M2 21v-2a5 5 0 0 1 5-5h4a5 5 0 0 1 5 5v2"/><path d="M16 3.1a4 4 0 0 1 0 7.8"/><path d="M22 21v-2a5 5 0 0 0-3-4.6"/></svg></div>
+    <h3>Reviewed Requests</h3>
+    <p>Our team reviews every withdrawal request. Contact support through the details provided on the platform if you have a question.</p>
+  </div>
+</section>
+
+<section class="calc" id="calculator">
+  <h2>Interactive Investment Calculator</h2>
+  <p class="sub">Model your expected asset performance based on capital principal and risk tier.</p>
+
+  <div class="lbl"><span>Principal Deposit (USD)</span><b id="pLbl">$5,000</b></div>
+  <input type="range" id="prin" min="500" max="100000" step="100" value="5000">
+  <div class="scale"><span id="s1">$500</span><span id="s2">$50,000</span><span id="s3">$100,000</span></div>
+
+  <div class="lbl"><span>Duration Term (Months)</span><b id="dLbl">12 Months</b></div>
+  <input type="range" id="dur" min="3" max="36" step="1" value="12">
+  <div class="scale"><span id="t1">3 Mo</span><span id="t2">18 Mo</span><span id="t3">36 Mo</span></div>
+
+  <div class="sect">Strategy &amp; Risk Profile</div>
+  <div class="risk" id="risk"></div>
+
+  <div class="result">
+    <div id="vals">
+      <div class="k">Projected Portfolio Value</div>
+      <div class="big" id="outVal">$0.00</div>
+      <div class="split">
+        <div><small>Initial Principal</small><b id="outPrin">$0</b></div>
+        <div><small>Projected Gain</small><b class="g" id="outProfit">+$0.00</b></div>
+      </div>
+    </div>
+    <button class="go" id="cta2">Start Your Savings Plan
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+    </button>
+  </div>
+  <p class="note" id="disc">Projections are hypothetical illustrations, not guarantees.</p>
+</section>
+
+<footer class="foot">
+  <div class="fbrand">APEX WEALTH</div>
+  <div class="flinks"><a href="#" id="fTerms">Terms of Service</a><a href="#" id="fPriv">Privacy Policy</a></div>
+  <p class="ftext" id="fText">Digital assets carry risk, including loss of principal. Nothing on this site is financial advice.</p>
+  <div class="fcopy">&copy; <span id="fYear"></span> Apex Wealth. All rights reserved.</div>
+</footer>
+
+<div class="modal" id="modal">
+  <div class="box">
+    <div class="tabs">
+      <button id="tabLogin" class="on">Sign In</button>
+      <button id="tabReg">Register</button>
+    </div>
+    <input type="email" id="email" placeholder="Email address" autocomplete="email">
+    <input type="password" id="pass" placeholder="Password" autocomplete="current-password">
+    <div class="hint" id="hint">Use 12+ characters with upper and lower case letters, a number and a symbol.</div>
+    <div class="lk" id="fgRow" style="display:none"><a href="#" id="fgLink">Forgot password?</a></div>
+    <div class="msg" id="msg"></div>
+    <button class="go" id="submit">Sign In</button>
+    <button class="cancel" id="cancel">Cancel</button>
+  </div>
+</div>
+
+<div class="modal" id="rs">
+  <div class="box">
+    <h3>Reset password</h3>
+    <p class="gsub" id="rsSub">Enter your email and we'll send you a 6-digit code.</p>
+    <input type="email" id="rsEmail" placeholder="Email address" autocomplete="email">
+    <div id="rsStep2" style="display:none">
+      <input type="text" id="rsCode" inputmode="numeric" maxlength="6" placeholder="6-digit code" autocomplete="one-time-code">
+      <input type="password" id="rsPass" placeholder="New password" autocomplete="new-password">
+      <div class="hint" style="display:block">Use 12+ characters with upper and lower case letters, a number and a symbol.</div>
+    </div>
+    <div class="msg" id="rsMsg"></div>
+    <button class="go" id="rsGo">Send code</button>
+    <button class="cancel" id="rsCancel">Cancel</button>
+  </div>
+</div>
+
+<div class="modal" id="consent">
+  <div class="box">
+    <h3>Before you continue</h3>
+    <p class="gsub">Please read and confirm each statement to proceed.</p>
+    <div class="legal" id="legalText">Loading...</div>
+    <div class="lk"><a href="#" id="cTerms">Read Terms</a><a href="#" id="cPriv">Read Privacy</a></div>
+    <div id="chkList"></div>
+    <div class="msg" id="cMsg"></div>
+    <button class="go" id="cOk" disabled>I Consent and Continue</button>
+    <button class="cancel" id="cNo">Cancel</button>
+  </div>
+</div>
+
+<div class="modal" id="gw">
+  <div class="box">
+    <h3>Your Savings Plan</h3>
+    <p class="gsub">Choose your plan and see the projection update instantly. Payment is the final step.</p>
+    <div class="flab">Risk profile</div>
+    <div class="risk" id="gRisk" style="margin-bottom:16px"></div>
+    <div class="flab">Amount (USD)</div>
+    <input type="number" id="gAmt" inputmode="decimal" value="5000">
+    <div class="flab">Term</div>
+    <select id="gTerm"></select>
+    <div class="flab" id="gPmLab" style="display:none">Payment method</div>
+    <select id="gPm" style="display:none"></select>
+    <div class="pdtag" id="gPmTag"></div>
+    <div class="gproj">
+      <small>Projected value (hypothetical)</small>
+      <div class="big" id="gVal">$0.00</div>
+      <div class="g" id="gProfit">+$0.00</div>
+    </div>
+    <div class="msg" id="gMsg"></div>
+    <button class="go" id="gPay">Continue to payment</button>
+    <button class="cancel" id="gClose">Close</button>
+  </div>
+</div>
+
+<div class="modal" id="wl">
+  <div class="box">
+    <h3>Pay for your plan</h3>
+    <p class="gsub" id="wlSub">Loading...</p>
+    <div class="pdtag" id="wlTag"></div>
+    <div id="wlBody" style="display:none">
+      <div class="wlrow"><span>Order</span><b id="wlRef"></b></div>
+      <div class="wlrow"><span>Asset</span><b id="wlAsset"></b></div>
+      <div class="wlrow"><span>Exact amount</span><b id="wlAmt"></b></div>
+      <div class="flab">Send to this address</div>
+      <div class="addr" id="wlAddr"></div>
+      <div class="flab">Your transaction hash</div>
+      <input type="text" id="wlTx" placeholder="0x..." autocomplete="off" autocapitalize="off" spellcheck="false">
+      <p class="note" style="margin:0 0 12px">Submitting a hash does not confirm your plan. Our team reviews every submission.</p>
+    </div>
+    <div class="msg" id="wlMsg"></div>
+    <button class="go" id="wlGo" style="display:none">Submit hash for review</button>
+    <button class="cancel" id="wlClose">Close</button>
+  </div>
+</div>
+
+<div class="modal" id="wd">
+  <div class="box">
+    <h3>Withdraw</h3>
+    <p class="gsub" id="wdSub">Choose the plan you want to withdraw.</p>
+    <div id="wdList"></div>
+    <div id="wdStep2" style="display:none">
+      <div class="plan" id="wdSum"></div>
+      <div class="legal" id="wdWarn" style="display:none"></div>
+      <label class="chk" id="wdChkRow" style="display:none"><input type="checkbox" id="wdChk"><span id="wdChkTxt"></span></label>
+      <p class="note" style="margin:0 0 12px">Estimate only. Nothing is paid automatically. Our team reviews every request.</p>
+    </div>
+    <div class="msg" id="wdMsg"></div>
+    <button class="go" id="wdGo" style="display:none" disabled>Submit withdrawal request</button>
+    <button class="cancel" id="wdBack" style="display:none">Back</button>
+    <button class="cancel" id="wdClose">Close</button>
+  </div>
+</div>
+
+<div class="modal" id="lg">
+  <div class="box">
+    <h3 id="lgTitle">Terms of Service</h3>
+    <p class="gsub">Please read carefully.</p>
+    <div class="lgb" id="lgBody">Loading...</div>
+    <button class="go" id="lgClose">Close</button>
+  </div>
+</div>
+
+<script>
+window.onerror = function(m, s, l){
+  var e = document.getElementById('err');
+  e.style.display = 'block';
+  e.textContent = 'Script error: ' + m + ' (line ' + l + ')';
+};
+function $(id){ return document.getElementById(id); }
+function fmt(n, d){
+  d = (d === undefined) ? 2 : d;
+  return '$' + Number(n).toLocaleString('en-US',{minimumFractionDigits:d,maximumFractionDigits:d});
+}
+function esc(s){
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function hasBackend(){ return typeof google !== 'undefined' && google.script && google.script.run; }
+function clamp(v, lo, hi){ return Math.max(lo, Math.min(hi, v)); }
+function say(id, t, ok){ var e = $(id); e.textContent = t; e.style.color = ok ? '#34d399' : '#fb7185'; }
+function flagHtml(f){ return f ? '<span class="flag">' + esc(f) + '</span>' : ''; }
+
+/* ---------- LIVE TERM VALUES: {FEE} and {FORFEIT} in consent and Terms text ---------- */
+var termTok = {fee:'5', forfeit:'you lose the returns earned so far'};
+function tt(s){
+  return String(s).replace(/\{FEE\}/g, termTok.fee).replace(/\{FORFEIT\}/g, termTok.forfeit);
+}
+function withTokens(cb){
+  if (!hasBackend()){ cb(); return; }
+  google.script.run
+    .withSuccessHandler(function(r){
+      if (r && r.success){ termTok = {fee: r.fee, forfeit: r.forfeit}; }
+      cb();
+    })
+    .withFailureHandler(function(){ cb(); })
+    .getTermTokens();
+}
+
+/* ---------- SESSION ---------- */
+var TOKEN_KEY = 'apex_session';
+var memToken = '';
+function saveToken(t){ memToken = t || ''; try { if (t) localStorage.setItem(TOKEN_KEY, t); } catch(e){} }
+function loadToken(){
+  try { var t = localStorage.getItem(TOKEN_KEY); if (t) return t; } catch(e){}
+  return memToken;
+}
+function clearToken(){ memToken = ''; try { localStorage.removeItem(TOKEN_KEY); } catch(e){} }
+
+/* ---------- REMEMBER WHERE YOU WERE (survives a Safari page reload) ---------- */
+var WL_KEY = 'apex_wl';
+var SCROLL_KEY = 'apex_scroll';
+var WL_MAX_AGE = 30 * 60 * 1000;
+var resumed = false;
+var wlOpenRow = 0;
+
+function wlSave(){
+  if (!wlOpenRow) return;
+  try { localStorage.setItem(WL_KEY, JSON.stringify({row: wlOpenRow, tx: $('wlTx').value, t: Date.now()})); } catch(e){}
+}
+function wlForget(){
+  wlOpenRow = 0;
+  try { localStorage.removeItem(WL_KEY); } catch(e){}
+}
+function saveScroll(){
+  try {
+    var y = window.pageYOffset || document.documentElement.scrollTop || 0;
+    localStorage.setItem(SCROLL_KEY, JSON.stringify({y: y, t: Date.now()}));
+  } catch(e){}
+}
+function restoreScroll(){
+  try {
+    var raw = localStorage.getItem(SCROLL_KEY);
+    if (!raw) return;
+    var s = JSON.parse(raw);
+    localStorage.removeItem(SCROLL_KEY);
+    if (!s || Date.now() - s.t > WL_MAX_AGE || !(s.y > 0)) return;
+    setTimeout(function(){ window.scrollTo(0, s.y); }, 250);
+  } catch(e){}
+}
+function resumeWallet(){
+  if (resumed || !loggedIn) return;
+  resumed = true;
+  try {
+    var raw = localStorage.getItem(WL_KEY);
+    if (!raw) return;
+    var s = JSON.parse(raw);
+    if (!s || !s.row || Date.now() - s.t > WL_MAX_AGE){ wlForget(); return; }
+    openWallet(Number(s.row), String(s.tx || ''));
+  } catch(e){ wlForget(); }
+}
+window.addEventListener('pagehide', saveScroll);
+document.addEventListener('visibilitychange', function(){
+  if (document.visibilityState === 'hidden'){ saveScroll(); wlSave(); }
+});
+
+/* ---------- MENU ---------- */
+$('burger').addEventListener('click', function(){ $('menu').classList.toggle('open'); });
+var links = document.getElementsByClassName('mlink');
+for (var i = 0; i < links.length; i++){
+  links[i].addEventListener('click', function(){ $('menu').classList.remove('open'); });
+}
+
+/* ---------- TICKER ---------- */
+var coins = [
+  {id:'bitcoin',  name:'Bitcoin',  sym:'BTC',  price:82763,  chg:-0.39},
+  {id:'ethereum', name:'Ethereum', sym:'ETH',  price:2494.91,chg:-0.08},
+  {id:'tether',   name:'Tether',   sym:'USDT', price:0.999,  chg:0},
+  {id:'solana',   name:'Solana',   sym:'SOL',  price:109.66, chg:-0.72}
+];
+function priceText(p){ return p < 10 ? '$' + Number(p).toFixed(3).replace(/0+$/,'').replace(/\.$/,'') : fmt(p,2); }
+function renderTicker(){
+  var h = '';
+  for (var i = 0; i < coins.length; i++){
+    var c = coins[i], up = c.chg > 0;
+    var chg = Math.round(c.chg * 100) / 100;
+    h += '<div class="tick"><div class="top"><span>' + c.name + '</span><span>' + c.sym + '</span></div>' +
+         '<div class="pr">' + priceText(c.price) + '</div>' +
+         '<div class="ch ' + (up ? 'up' : 'dn') + '">' + (up ? '\u25B2 +' : '\u25BC ') + chg + '%</div></div>';
+  }
+  $('ticker').innerHTML = h;
+}
+function loadPrices(){
+  try{
+    var ids = coins.map(function(c){ return c.id; }).join(',');
+    fetch('https://api.coingecko.com/api/v3/simple/price?ids=' + ids + '&vs_currencies=usd&include_24hr_change=true')
+      .then(function(r){ return r.json(); })
+      .then(function(d){
+        coins.forEach(function(c){
+          if (d[c.id]){ c.price = d[c.id].usd; c.chg = d[c.id].usd_24h_change || 0; }
+        });
+        renderTicker();
+      })
+      .catch(function(){});
+  }catch(e){}
+}
+
+/* ---------- CONFIG (from your Sheet) ---------- */
+var cfg = {
+  bannerText:'', bannerColor:'#fcd34d', riskDisclosure:'', minAge:18,
+  footerText:'Digital assets carry risk, including loss of principal. Nothing on this site is financial advice.',
+  minDeposit:500, maxDeposit:100000, minTerm:3, maxTerm:36, showProjectedReturns:true,
+  products:[
+    {id:'conservative',name:'Conservative',apy:0.08},
+    {id:'balanced',name:'Balanced',apy:0.18},
+    {id:'aggressive',name:'Aggressive',apy:0.35}
+  ]
+};
+var rate = 0.18, selId = 'balanced';
+var gSel = 'balanced';
+var payOpts = {mode:'SANDBOX', open:false, methods:[]};
+
+function tierHtml(selected){
+  var h = '';
+  for (var j = 0; j < cfg.products.length; j++){
+    var p = cfg.products[j];
+    h += '<button data-id="' + esc(p.id) + '" class="' + (p.id === selected ? 'on' : '') + '"><b>' +
+         esc(p.name) + '</b><span>' + Math.round(p.apy * 10000) / 100 + '% APY*</span></button>';
+  }
+  return h;
+}
+function ensureSel(cur){
+  for (var i = 0; i < cfg.products.length; i++){ if (cfg.products[i].id === cur) return cur; }
+  return cfg.products.length ? cfg.products[Math.min(1, cfg.products.length - 1)].id : cur;
+}
+function apyOf(id){
+  for (var i = 0; i < cfg.products.length; i++){ if (cfg.products[i].id === id) return cfg.products[i].apy; }
+  return 0;
+}
+
+function renderProducts(){
+  selId = ensureSel(selId);
+  rate = apyOf(selId);
+  $('risk').innerHTML = tierHtml(selId);
+  $('risk').style.gridTemplateColumns = 'repeat(' + clamp(cfg.products.length, 1, 3) + ',1fr)';
+}
+
+function applyConfig(){
+  var b = $('banner');
+  if (cfg.bannerText){
+    var bc = /^#[0-9a-fA-F]{6}$/.test(cfg.bannerColor) ? cfg.bannerColor : '#fcd34d';
+    b.textContent = cfg.bannerText;
+    b.style.color = bc;
+    b.style.background = bc + '22';
+    b.style.borderBottom = '1px solid ' + bc + '66';
+    b.style.display = 'block';
+  } else { b.style.display = 'none'; }
+
+  var ft = $('fText');
+  ft.textContent = cfg.footerText || '';
+  ft.style.display = cfg.footerText ? 'block' : 'none';
+
+  var pr = $('prin'), du = $('dur');
+  pr.min = cfg.minDeposit; pr.max = cfg.maxDeposit;
+  pr.step = cfg.maxDeposit >= 250000 ? 1000 : 100;
+  pr.value = clamp(Number(pr.value), cfg.minDeposit, cfg.maxDeposit);
+  du.min = cfg.minTerm; du.max = cfg.maxTerm;
+  du.value = clamp(Number(du.value), cfg.minTerm, cfg.maxTerm);
+  $('s1').textContent = fmt(cfg.minDeposit, 0);
+  $('s2').textContent = fmt(Math.round((cfg.minDeposit + cfg.maxDeposit) / 2), 0);
+  $('s3').textContent = fmt(cfg.maxDeposit, 0);
+  $('t1').textContent = cfg.minTerm + ' Mo';
+  $('t2').textContent = Math.round((cfg.minTerm + cfg.maxTerm) / 2) + ' Mo';
+  $('t3').textContent = cfg.maxTerm + ' Mo';
+
+  $('vals').style.display = cfg.showProjectedReturns ? 'block' : 'none';
+  if (cfg.riskDisclosure) $('disc').textContent = '*Illustrative rate. ' + cfg.riskDisclosure;
+  renderProducts();
+  calc();
+}
+
+function loadConfig(){
+  if (!hasBackend()) return;
+  google.script.run
+    .withSuccessHandler(function(c){
+      if (!c || !c.success) return;
+      cfg.bannerText = c.bannerText;
+      cfg.bannerColor = c.bannerColor || '#fcd34d';
+      if (c.footerText !== undefined) cfg.footerText = c.footerText;
+      cfg.riskDisclosure = c.riskDisclosure;
+      cfg.minAge = c.minAge || 18;
+      cfg.minDeposit = c.minDeposit; cfg.maxDeposit = c.maxDeposit;
+      cfg.minTerm = c.minTerm; cfg.maxTerm = c.maxTerm;
+      cfg.showProjectedReturns = c.showProjectedReturns;
+      if (c.products && c.products.length) cfg.products = c.products;
+      applyConfig();
+      refreshAccount();
+    })
+    .withFailureHandler(function(){})
+    .getPlatformConfig();
+}
+
+/* ---------- CALCULATOR ---------- */
+function calc(){
+  var p = Number($('prin').value), m = Number($('dur').value);
+  var val = p * Math.pow(1 + rate / 12, m);
+  $('pLbl').textContent = fmt(p, 0);
+  $('dLbl').textContent = m + ' Months';
+  $('outVal').textContent = fmt(val, 2);
+  $('outPrin').textContent = fmt(p, 0);
+  $('outProfit').textContent = '+' + fmt(val - p, 2);
+}
+$('prin').addEventListener('input', calc);
+$('dur').addEventListener('input', calc);
+$('risk').addEventListener('click', function(ev){
+  var btn = ev.target.closest ? ev.target.closest('button') : null;
+  if (!btn) return;
+  selId = btn.getAttribute('data-id');
+  renderProducts();
+  calc();
+});
+
+/* ---------- AUTH + ACCOUNT ---------- */
+var mode = 'login';
+var loggedIn = false;
+var lastPlans = [];
+var wdEnabled = true;
+
+function setMode(m){
+  mode = m;
+  $('tabLogin').className = (m === 'login') ? 'on' : '';
+  $('tabReg').className = (m === 'register') ? 'on' : '';
+  $('submit').textContent = (m === 'login') ? 'Sign In' : 'Create Account';
+  $('pass').setAttribute('autocomplete', m === 'login' ? 'current-password' : 'new-password');
+  $('hint').style.display = (m === 'register') ? 'block' : 'none';
+  $('fgRow').style.display = (m === 'login') ? 'block' : 'none';
+  $('msg').textContent = '';
+}
+function openAuth(m){ $('menu').classList.remove('open'); setMode(m); $('modal').classList.add('open'); }
+function closeAuth(){ $('modal').classList.remove('open'); }
+function showMsg(t, ok){ say('msg', t, ok); }
+
+function setLoggedIn(email, bal){
+  loggedIn = true;
+  $('menuAuth').style.display = 'none';
+  $('menuOut').style.display = 'flex';
+  $('pEmail').textContent = email;
+  $('pdEmail').textContent = email;
+  $('pBal').textContent = fmt(bal || 0, 2);
+  if ($('pd').style.display !== 'block') $('dash').style.display = 'block';
+}
+
+function statusInfo(st){
+  if (st === 'CONFIRMED') return {t:'PAYMENT CONFIRMED', c:'ok', n:'Active'};
+  if (st === 'REJECTED') return {t:'NOT APPROVED', c:'bad', n:'Contact support'};
+  return {t:'REQUEST RECEIVED', c:'', n:'Awaiting payment opening'};
+}
+
+function payInfo(p){
+  var s = p.status;
+  if (s === 'PENDING') return {t:'AWAITING PAYMENT', c:'', n:p.ref};
+  if (s === 'CONFIRMING') return {t:'PAYMENT DETECTED', c:'', n:p.ref};
+  if (s === 'CONFIRMED' || s === 'OVERPAID') return {t:'PAYMENT CONFIRMED', c:'ok', n:p.ref};
+  if (s === 'UNDERPAID') return {t:'UNDERPAID', c:'bad', n:'Contact support ' + p.ref};
+  if (s === 'EXPIRED') return {t:'ORDER EXPIRED', c:'bad', n:p.ref};
+  if (s === 'FAILED') return {t:'PAYMENT FAILED', c:'bad', n:p.ref};
+  return {t:'REQUEST RECEIVED', c:'', n:p.ref};
+}
+
+function wlBtn(row){
+  return '<button class="btn wlbtn wlopen" data-row="' + row + '">Pay / submit transaction hash</button>';
+}
+
+function renderRequests(list){
+  if (!list || !list.length){
+    $('reqList').innerHTML = '<div class="empty">No requests yet. Tap Start a savings plan.</div>';
+    return;
+  }
+  var h = '';
+  for (var i = 0; i < list.length; i++){
+    var x = list[i], gift = (x.kind === 'GIFT');
+    var si = gift
+      ? (x.status === 'REJECTED' ? {t:'REVERSED', c:'bad', n:'Contact support'} : {t:'CREDITED', c:'ok', n:'Added to balance'})
+      : statusInfo(x.status);
+    if (!gift && x.pay && x.status === 'PENDING') si = payInfo(x.pay);
+    if (x.wd === 'PROCESSING') si = {t:'PROCESSING REQUEST', c:'', n:'Withdrawal under review'};
+    else if (x.wd === 'ACCEPTED') si = {t:'WITHDRAWAL APPROVED', c:'ok', n:'Plan closed'};
+    var canPay = (!gift && x.status === 'PENDING' && x.pay && x.pay.status === 'PENDING' && !x.wd);
+    h += '<div class="plan"><div class="r1"><span>' + esc(x.name) + flagHtml(x.flag) + '</span><span>' + fmt(x.amount, 2) + '</span></div>' +
+         '<div class="r2"><span>' + ((gift && !x.months) ? 'Credit' : x.months + ' months') + '</span><span>' + esc(x.date) + '</span></div>' +
+         '<div class="r2"><span class="st ' + si.c + '">' + si.t + '</span><span>' + esc(si.n) + '</span></div>' +
+         (canPay ? wlBtn(x.row) : '') + '</div>';
+  }
+  $('reqList').innerHTML = h;
+}
+
+var allocColors = ['#4f8cff','#a770ff','#34d399','#fbbf24','#fb7185','#22d3ee'];
+
+function renderDashboard(res){
+  $('dash').style.display = 'none';
+  $('pd').style.display = 'block';
+  $('pdTag').style.display = (res.access === 'TEST_AFTER_REQUEST') ? 'block' : 'none';
+
+  $('stBal').textContent = fmt(res.balance, 2);
+  $('stBalD').textContent = 'Principal ' + fmt(res.principal, 2);
+  $('stProfit').textContent = fmt(res.profit, 2);
+  $('stProfitD').textContent = '+' + res.profitPct + '% accrued';
+  $('stActive').textContent = res.activePlans;
+  $('stActiveD').textContent = 'of ' + res.totalPlans + ' total';
+  $('stNext').textContent = res.nextMaturity || 'None';
+  $('stNextD').innerHTML = res.nextMaturity ? 'Upcoming payout' : '&nbsp;';
+
+  var h = '';
+  for (var i = 0; i < res.plans.length; i++){
+    var x = res.plans[i];
+    var noTerm = (x.kind === 'GIFT' && !x.months);
+    var stTxt, stCls, rightTxt;
+    if (x.wd === 'PROCESSING'){ stTxt = 'PROCESSING REQUEST'; stCls = ''; rightTxt = 'Withdrawal under review'; }
+    else if (x.wd === 'ACCEPTED'){ stTxt = 'WITHDRAWAL APPROVED'; stCls = 'ok'; rightTxt = 'Plan closed'; }
+    else if (noTerm){ stTxt = 'CREDITED'; stCls = 'ok'; rightTxt = esc(x.date); }
+    else {
+      var pending = x.status !== 'CONFIRMED';
+      stTxt = (pending ? 'TEST: ' : '') + (x.matured ? 'MATURED' : 'ACTIVE');
+      stCls = pending ? '' : 'ok';
+      rightTxt = 'Matures ' + esc(x.maturity);
+    }
+    var mid = noTerm ? '<span>Credit</span>' : '<span>' + x.months + ' mo \u00B7 ' + Math.round(x.apy * 10000) / 100 + '%</span>';
+    var canPay = (x.kind !== 'GIFT' && x.status === 'PENDING' && !x.wd);
+    h += '<div class="plan"><div class="r1"><span>' + esc(x.name) + flagHtml(x.flag) + '</span><span>' + fmt(x.amount, 2) + '</span></div>' +
+         '<div class="r2">' + mid + '<span style="color:#34d399">Now ' + fmt(x.value, 2) + '</span></div>' +
+         '<div class="r2"><span class="st ' + stCls + '">' + stTxt + '</span><span>' + rightTxt + '</span></div>' +
+         (canPay ? wlBtn(x.row) : '') + '</div>';
+  }
+  $('pdPlans').innerHTML = h || '<div class="empty">No plans yet.</div>';
+
+  var a = '';
+  for (var j = 0; j < res.allocation.length; j++){
+    var al = res.allocation[j];
+    a += '<div class="al"><div class="ar"><span>' + esc(al.name) + '</span><span>' + al.pct + '%</span></div>' +
+         '<div class="bar"><div class="fill" style="width:' + al.pct + '%;background:' + allocColors[j % allocColors.length] + '"></div></div></div>';
+  }
+  $('pdAlloc').innerHTML = a || '<div class="empty">No allocation yet.</div>';
+}
+
+function showAccount(res){
+  lastPlans = res.plans || [];
+  wdEnabled = (res.withdrawEnabled !== false);
+  setLoggedIn(res.email, res.balance);
+  renderRequests(res.requests);
+  if (res.unlocked){ renderDashboard(res); }
+  else {
+    $('pd').style.display = 'none';
+    $('dash').style.display = 'block';
+  }
+}
+
+function refreshAccount(cb){
+  var t = loadToken();
+  if (!t || !hasBackend()) return;
+  google.script.run
+    .withSuccessHandler(function(res){
+      if (res && res.success){
+        showAccount(res);
+        if (!resumed){ restoreScroll(); resumeWallet(); }
+        if (cb) cb(res);
+      }
+    })
+    .withFailureHandler(function(){})
+    .getAccount(t);
+}
+
+function logout(){
+  var t = loadToken();
+  clearToken();
+  wlForget();
+  try { localStorage.removeItem(SCROLL_KEY); } catch(e){}
+  loggedIn = false;
+  lastPlans = [];
+  try { if (t && hasBackend()) google.script.run.withFailureHandler(function(){}).logoutUser(t); } catch(e){}
+  $('dash').style.display = 'none';
+  $('pd').style.display = 'none';
+  $('wl').classList.remove('open');
+  $('menuAuth').style.display = 'flex';
+  $('menuOut').style.display = 'none';
+  $('menu').classList.remove('open');
+  $('pass').value = '';
+}
+
+function submitAuth(){
+  var email = $('email').value.trim(), pass = $('pass').value;
+  if (!email || !pass){ showMsg('Enter your email and password.', false); return; }
+  if (!hasBackend()){ showMsg('Backend not available.', false); return; }
+  $('submit').disabled = true; showMsg('Please wait...', true);
+  var runner = google.script.run
+    .withSuccessHandler(function(res){
+      $('submit').disabled = false;
+      if (res && res.success){
+        if (res.token) saveToken(res.token);
+        showMsg(res.message || 'Success', true);
+        setTimeout(function(){
+          closeAuth();
+          $('pass').value = '';
+          setLoggedIn(res.email || email, res.balance);
+          refreshAccount();
+        }, 500);
+      } else {
+        showMsg((res && res.message) || 'Request failed.', false);
+      }
+    })
+    .withFailureHandler(function(){
+      $('submit').disabled = false;
+      showMsg('Connection error. Please try again.', false);
+    });
+  var payload = {email: email, password: pass};
+  if (mode === 'login') runner.loginUser(payload); else runner.registerUser(payload);
+}
+
+function restore(){
+  var t = loadToken();
+  if (!t || !hasBackend()) return;
+  google.script.run
+    .withSuccessHandler(function(res){
+      if (res && res.success){ memToken = t; setLoggedIn(res.email, res.balance); refreshAccount(); }
+      else if (res && /expired|not found|No session/i.test(res.message || '')){ clearToken(); }
+    })
+    .withFailureHandler(function(){})
+    .restoreSession(t);
+}
+
+/* ---------- FORGOT PASSWORD ---------- */
+var rsStage = 1;
+function openReset(){
+  var typed = $('email').value.trim();
+  closeAuth();
+  rsStage = 1;
+  $('rsStep2').style.display = 'none';
+  $('rsSub').textContent = "Enter your email and we'll send you a 6-digit code.";
+  $('rsGo').textContent = 'Send code';
+  $('rsGo').disabled = false;
+  $('rsEmail').value = typed;
+  $('rsEmail').disabled = false;
+  $('rsCode').value = '';
+  $('rsPass').value = '';
+  $('rsMsg').textContent = '';
+  $('rs').classList.add('open');
+}
+$('fgLink').addEventListener('click', function(ev){ ev.preventDefault(); openReset(); });
+$('rsCancel').addEventListener('click', function(){ $('rs').classList.remove('open'); });
+$('rsGo').addEventListener('click', function(){
+  if (!hasBackend()){ say('rsMsg', 'Backend not available.', false); return; }
+  var email = $('rsEmail').value.trim();
+  if (!email){ say('rsMsg', 'Enter your email address.', false); return; }
+  $('rsGo').disabled = true;
+  if (rsStage === 1){
+    say('rsMsg', 'Sending...', true);
+    google.script.run
+      .withSuccessHandler(function(res){
+        $('rsGo').disabled = false;
+        if (res && res.success){
+          rsStage = 2;
+          $('rsStep2').style.display = 'block';
+          $('rsEmail').disabled = true;
+          $('rsSub').textContent = 'Enter the code from your email and choose a new password.';
+          $('rsGo').textContent = 'Reset password';
+          say('rsMsg', res.message, true);
+        } else {
+          say('rsMsg', (res && res.message) || 'Request failed.', false);
+        }
+      })
+      .withFailureHandler(function(){ $('rsGo').disabled = false; say('rsMsg', 'Connection error.', false); })
+      .requestPasswordReset({email: email});
+  } else {
+    var code = $('rsCode').value.trim(), np = $('rsPass').value;
+    if (!code || !np){ $('rsGo').disabled = false; say('rsMsg', 'Enter the code and a new password.', false); return; }
+    say('rsMsg', 'Updating...', true);
+    google.script.run
+      .withSuccessHandler(function(res){
+        $('rsGo').disabled = false;
+        if (res && res.success){
+          say('rsMsg', res.message, true);
+          setTimeout(function(){
+            $('rs').classList.remove('open');
+            openAuth('login');
+            $('email').value = email;
+            $('pass').value = '';
+            say('msg', 'Password updated. Please sign in.', true);
+          }, 1200);
+        } else {
+          say('rsMsg', (res && res.message) || 'Request failed.', false);
+        }
+      })
+      .withFailureHandler(function(){ $('rsGo').disabled = false; say('rsMsg', 'Connection error.', false); })
+      .resetPassword({email: email, code: code, password: np});
+  }
+});
+
+/* ---------- CONSENT (content comes from your Sheet) ---------- */
+var consented = false;
+var consentReady = false;
+function nl(s){ return esc(s).replace(/\n/g, '<br>'); }
+function updateConsentBtn(){
+  var cs = $('chkList').getElementsByTagName('input');
+  var all = consentReady && cs.length > 0;
+  for (var i = 0; i < cs.length; i++){ if (!cs[i].checked) all = false; }
+  $('cOk').disabled = !all;
+}
+function renderConsent(c){
+  var h = '';
+  for (var i = 0; i < c.sections.length; i++){
+    var s = c.sections[i];
+    h += '<p>' + (s.title ? '<b>' + nl(tt(s.title)) + '.</b> ' : '') + nl(tt(s.text)) + '</p>';
+  }
+  $('legalText').innerHTML = h || '<p>Please confirm below.</p>';
+  var k = '';
+  for (var j = 0; j < c.checks.length; j++){
+    k += '<label class="chk"><input type="checkbox"><span>' + nl(tt(c.checks[j].text)) + '</span></label>';
+  }
+  $('chkList').innerHTML = k;
+  consentReady = true;
+  updateConsentBtn();
+}
+function openConsent(){
+  consentReady = false;
+  $('legalText').textContent = 'Loading...';
+  $('chkList').innerHTML = '';
+  $('cMsg').textContent = '';
+  $('cOk').disabled = true;
+  $('consent').classList.add('open');
+  if (!hasBackend()){ say('cMsg', 'Backend not available.', false); return; }
+  withTokens(function(){
+    google.script.run
+      .withSuccessHandler(function(c){
+        if (c && c.success){ renderConsent(c); $('legalText').scrollTop = 0; }
+        else { $('legalText').textContent = ''; say('cMsg', (c && c.message) || 'Could not load the consent.', false); }
+      })
+      .withFailureHandler(function(){
+        $('legalText').textContent = '';
+        say('cMsg', 'Connection error. Close and try again.', false);
+      })
+      .getConsentContent();
+  });
+}
+$('chkList').addEventListener('change', updateConsentBtn);
+$('cNo').addEventListener('click', function(){ $('consent').classList.remove('open'); });
+$('cOk').addEventListener('click', function(){
+  var t = loadToken();
+  if (!t || !hasBackend()){ say('cMsg', 'Please sign in again.', false); return; }
+  $('cOk').disabled = true; say('cMsg', 'Saving...', true);
+  google.script.run
+    .withSuccessHandler(function(res){
+      if (res && res.success){
+        consented = true;
+        $('consent').classList.remove('open');
+        showGateway();
+      } else {
+        $('cOk').disabled = false;
+        say('cMsg', (res && res.message) || 'Could not save. Try again.', false);
+      }
+    })
+    .withFailureHandler(function(){ $('cOk').disabled = false; say('cMsg', 'Connection error.', false); })
+    .recordConsent(t);
+});
+
+/* ---------- TERMS / PRIVACY (content comes from your Sheet) ---------- */
+function openLegal(page){
+  $('menu').classList.remove('open');
+  $('lgTitle').textContent = (page === 'PRIVACY') ? 'Privacy Policy' : 'Terms of Service';
+  $('lgBody').textContent = 'Loading...';
+  $('lg').classList.add('open');
+  if (!hasBackend()){ $('lgBody').textContent = 'Backend not available.'; return; }
+  withTokens(function(){
+    google.script.run
+      .withSuccessHandler(function(r){
+        if (r && r.success){
+          $('lgTitle').textContent = r.title;
+          var h = '';
+          for (var i = 0; i < r.items.length; i++){
+            var it = r.items[i];
+            h += (it.type === 'HEADING') ? '<h4>' + nl(tt(it.text)) + '</h4>' : '<p>' + nl(tt(it.text)) + '</p>';
+          }
+          $('lgBody').innerHTML = h;
+          $('lgBody').scrollTop = 0;
+        } else {
+          $('lgBody').textContent = (r && r.message) || 'Could not load this page.';
+        }
+      })
+      .withFailureHandler(function(){ $('lgBody').textContent = 'Connection error. Close and try again.'; })
+      .getLegalPage(page);
+  });
+}
+function bindLegal(id, page){
+  $(id).addEventListener('click', function(ev){ ev.preventDefault(); openLegal(page); });
+}
+bindLegal('fTerms', 'TERMS');
+bindLegal('fPriv', 'PRIVACY');
+bindLegal('cTerms', 'TERMS');
+bindLegal('cPriv', 'PRIVACY');
+$('lgClose').addEventListener('click', function(){ $('lg').classList.remove('open'); });
+
+/* ---------- INVESTMENT PAGE ---------- */
+function buildTerms(){
+  var opts = [], seen = {};
+  var list = [cfg.minTerm, 6, 12, 18, 24, 36, cfg.maxTerm];
+  list.sort(function(a,b){ return a-b; });
+  for (var i = 0; i < list.length; i++){
+    var m = list[i];
+    if (m < cfg.minTerm || m > cfg.maxTerm || seen[m]) continue;
+    seen[m] = true; opts.push(m);
+  }
+  var h = '';
+  for (var j = 0; j < opts.length; j++){ h += '<option value="' + opts[j] + '">' + opts[j] + ' months</option>'; }
+  $('gTerm').innerHTML = h;
+}
+function buildPayMethods(){
+  var show = !!payOpts.open;
+  $('gPmLab').style.display = show ? 'block' : 'none';
+  $('gPm').style.display = show ? 'block' : 'none';
+  var h = '';
+  for (var i = 0; i < payOpts.methods.length; i++){
+    h += '<option value="' + esc(payOpts.methods[i]) + '">' + esc(payOpts.methods[i]) + '</option>';
+  }
+  $('gPm').innerHTML = h;
+  var tag = $('gPmTag');
+  if (show && payOpts.mode === 'SANDBOX'){
+    tag.textContent = 'TEST MODE: no real payment is taken. Do not send any funds.';
+    tag.style.display = 'block';
+  } else {
+    tag.style.display = 'none';
+  }
+}
+function gwCalc(){
+  var amt = Number($('gAmt').value) || 0;
+  var m = Number($('gTerm').value) || cfg.minTerm;
+  var val = amt * Math.pow(1 + apyOf(gSel) / 12, m);
+  $('gVal').textContent = fmt(val, 2);
+  $('gProfit').textContent = '+' + fmt(Math.max(0, val - amt), 2) + ' projected';
+}
+function renderGwTiers(){
+  gSel = ensureSel(gSel);
+  $('gRisk').innerHTML = tierHtml(gSel);
+  $('gRisk').style.gridTemplateColumns = 'repeat(' + clamp(cfg.products.length, 1, 3) + ',1fr)';
+}
+function openGatewayModal(){
+  gSel = selId;
+  buildTerms();
+  buildPayMethods();
+  var m = Number($('dur').value);
+  var best = $('gTerm').options[0] ? Number($('gTerm').options[0].value) : m;
+  for (var i = 0; i < $('gTerm').options.length; i++){
+    if (Math.abs(Number($('gTerm').options[i].value) - m) < Math.abs(best - m)) best = Number($('gTerm').options[i].value);
+  }
+  $('gTerm').value = best;
+  $('gAmt').value = Number($('prin').value);
+  $('gMsg').textContent = '';
+  renderGwTiers();
+  gwCalc();
+  $('gw').classList.add('open');
+}
+/* Always fetch the payment options fresh, so the payment method dropdown matches the server. */
+function showGateway(){
+  if (!hasBackend()){ openGatewayModal(); return; }
+  google.script.run
+    .withSuccessHandler(function(r){
+      if (r && r.success){ payOpts = {mode: r.mode, open: !!r.open, methods: r.methods || []}; }
+      openGatewayModal();
+    })
+    .withFailureHandler(function(){ openGatewayModal(); })
+    .getPaymentOptions();
+}
+function openGateway(){
+  if (!loggedIn){ openAuth('register'); return; }
+  var t = loadToken();
+  if (!t || !hasBackend()){ openAuth('login'); return; }
+  google.script.run
+    .withSuccessHandler(function(res){
+      if (res && res.success && res.consented){ consented = true; showGateway(); }
+      else { consented = false; openConsent(); }
+    })
+    .withFailureHandler(function(){ openConsent(); })
+    .getConsentStatus(t);
+}
+$('gRisk').addEventListener('click', function(ev){
+  var btn = ev.target.closest ? ev.target.closest('button') : null;
+  if (!btn) return;
+  gSel = btn.getAttribute('data-id');
+  renderGwTiers();
+  gwCalc();
+});
+$('gAmt').addEventListener('input', gwCalc);
+$('gTerm').addEventListener('change', gwCalc);
+$('gClose').addEventListener('click', function(){ $('gw').classList.remove('open'); });
+$('gPay').addEventListener('click', function(){
+  var t = loadToken();
+  if (!t || !hasBackend()){ say('gMsg', 'Please sign in again.', false); return; }
+  var amt = Number($('gAmt').value);
+  if (!isFinite(amt) || amt < cfg.minDeposit || amt > cfg.maxDeposit){
+    say('gMsg', 'Amount must be between ' + fmt(cfg.minDeposit, 0) + ' and ' + fmt(cfg.maxDeposit, 0) + '.', false);
+    return;
+  }
+  var method = payOpts.open ? $('gPm').value : '';
+  if (payOpts.open && !method){ say('gMsg', 'Please pick a payment method.', false); return; }
+  $('gPay').disabled = true; say('gMsg', 'Checking...', true);
+  google.script.run
+    .withSuccessHandler(function(res){
+      $('gPay').disabled = false;
+      say('gMsg', (res && res.message) || 'Request failed.', !!(res && res.success));
+      if (res && res.success){
+        refreshAccount(function(acc){
+          $('gw').classList.remove('open');
+          if (acc.unlocked){
+            $('pd').scrollIntoView({behavior:'smooth'});
+          } else {
+            $('dash').scrollIntoView({behavior:'smooth'});
+          }
+        });
+      }
+    })
+    .withFailureHandler(function(){ $('gPay').disabled = false; say('gMsg', 'Connection error.', false); })
+    .submitLiveInterest(t, gSel, amt, Number($('gTerm').value), method);
+});
+
+/* ---------- PAY / SUBMIT TRANSACTION HASH (test mode wallet flow) ---------- */
+var wlRow = 0;
+function openWallet(row, prefillTx){
+  var t = loadToken();
+  if (!t || !hasBackend()){ openAuth('login'); return; }
+  wlRow = row;
+  wlOpenRow = row;
+  $('wlSub').textContent = 'Loading...';
+  $('wlTag').style.display = 'none';
+  $('wlBody').style.display = 'none';
+  $('wlGo').style.display = 'none';
+  $('wlGo').disabled = false;
+  $('wlTx').value = prefillTx || '';
+  $('wlMsg').textContent = '';
+  $('wl').classList.add('open');
+  wlSave();
+  google.script.run
+    .withSuccessHandler(function(r){
+      if (!r || !r.success){
+        $('wlSub').textContent = '';
+        say('wlMsg', (r && r.message) || 'Could not load payment details.', false);
+        wlForget();
+        return;
+      }
+      $('wlSub').textContent = 'Follow the steps below, then submit your transaction hash.';
+      $('wlRef').textContent = r.ref;
+      $('wlAsset').textContent = r.asset;
+      $('wlAmt').textContent = r.amount + ' USD';
+      $('wlAddr').textContent = r.address;
+      var tg = $('wlTag');
+      tg.textContent = r.note;
+      tg.style.display = 'block';
+      $('wlBody').style.display = 'block';
+      $('wlGo').style.display = 'block';
+    })
+    .withFailureHandler(function(){ $('wlSub').textContent = ''; say('wlMsg', 'Connection error.', false); })
+    .getWalletInstructions(t, row);
+}
+$('wlTx').addEventListener('input', wlSave);
+$('wlGo').addEventListener('click', function(){
+  var t = loadToken();
+  if (!t || !hasBackend()){ say('wlMsg', 'Please sign in again.', false); return; }
+  var tx = $('wlTx').value.trim();
+  if (!tx){ say('wlMsg', 'Enter your transaction hash.', false); return; }
+  $('wlGo').disabled = true; say('wlMsg', 'Sending...', true);
+  google.script.run
+    .withSuccessHandler(function(r){
+      if (r && r.success){
+        say('wlMsg', r.message, true);
+        wlForget();
+        refreshAccount();
+        setTimeout(function(){ $('wl').classList.remove('open'); }, 1600);
+      } else {
+        $('wlGo').disabled = false;
+        say('wlMsg', (r && r.message) || 'Request failed.', false);
+      }
+    })
+    .withFailureHandler(function(){ $('wlGo').disabled = false; say('wlMsg', 'Connection error.', false); })
+    .submitTxid(t, wlRow, tx);
+});
+$('wlClose').addEventListener('click', function(){ wlForget(); $('wl').classList.remove('open'); });
+function bindWl(id){
+  $(id).addEventListener('click', function(ev){
+    var b = ev.target.closest ? ev.target.closest('.wlopen') : null;
+    if (!b) return;
+    openWallet(Number(b.getAttribute('data-row')));
+  });
+}
+bindWl('reqList');
+bindWl('pdPlans');
+
+/* ---------- WITHDRAW (request only; the team reviews every request) ---------- */
+var wdRow = 0, wdEarly = false;
+
+function wdShowList(){
+  $('wdSub').textContent = 'Choose the plan you want to withdraw.';
+  $('wdList').style.display = 'block';
+  $('wdStep2').style.display = 'none';
+  $('wdGo').style.display = 'none';
+  $('wdBack').style.display = 'none';
+  $('wdMsg').textContent = '';
+}
+function openWithdraw(){
+  if (!loggedIn) return;
+  if (!wdEnabled){ say('pdMsg', 'Withdrawals are not open right now.', false); return; }
+  var h = '';
+  for (var i = 0; i < lastPlans.length; i++){
+    var p = lastPlans[i];
+    if (!p.canWithdraw || !p.row) continue;
+    h += '<div class="plan wdopt" data-row="' + p.row + '">' +
+         '<div class="r1"><span>' + esc(p.name) + flagHtml(p.flag) + '</span><span>' + fmt(p.amount, 2) + '</span></div>' +
+         '<div class="r2"><span>Now ' + fmt(p.value, 2) + '</span><span>' + (p.matured ? 'Matured' : 'Matures ' + esc(p.maturity)) + '</span></div></div>';
+  }
+  $('wdList').innerHTML = h || '<div class="empty">No plans available to withdraw right now.</div>';
+  wdShowList();
+  $('wd').classList.add('open');
+}
+function wdPreview(row){
+  var t = loadToken();
+  if (!t || !hasBackend()){ say('wdMsg', 'Please sign in again.', false); return; }
+  say('wdMsg', 'Loading...', true);
+  google.script.run
+    .withSuccessHandler(function(r){
+      if (!r || !r.success){ say('wdMsg', (r && r.message) || 'Could not load.', false); return; }
+      wdRow = row; wdEarly = !!r.early;
+      var s = '<div class="r1"><span>' + esc(r.planName) + '</span><span>' + fmt(r.amount, 2) + '</span></div>' +
+              '<div class="r2"><span>Value now</span><span>' + fmt(r.value, 2) + '</span></div>';
+      if (r.early){
+        if (r.lost > 0) s += '<div class="r2"><span>Returns lost</span><span style="color:#fb7185">-' + fmt(r.lost, 2) + '</span></div>';
+        s += '<div class="r2"><span>Early fee (' + r.feePct + '%)</span><span style="color:#fb7185">-' + fmt(r.fee, 2) + '</span></div>';
+      }
+      s += '<div class="r2"><span>Estimated payout</span><span style="color:#34d399">' + fmt(r.payout, 2) + '</span></div>';
+      $('wdSum').innerHTML = s;
+      if (r.early){
+        $('wdWarn').innerHTML = '<p>' + nl(r.warning) + '</p>';
+        $('wdWarn').style.display = 'block';
+        $('wdChkTxt').textContent = r.checkText;
+        $('wdChkRow').style.display = 'flex';
+      } else {
+        $('wdWarn').style.display = 'none';
+        $('wdChkRow').style.display = 'none';
+      }
+      $('wdChk').checked = false;
+      $('wdSub').textContent = 'Review your withdrawal request.';
+      $('wdList').style.display = 'none';
+      $('wdStep2').style.display = 'block';
+      $('wdGo').style.display = 'block';
+      $('wdGo').disabled = wdEarly;
+      $('wdBack').style.display = 'block';
+      $('wdMsg').textContent = '';
+    })
+    .withFailureHandler(function(){ say('wdMsg', 'Connection error.', false); })
+    .getWithdrawalPreview(t, row);
+}
+$('wdList').addEventListener('click', function(ev){
+  var el = ev.target.closest ? ev.target.closest('.wdopt') : null;
+  if (!el) return;
+  wdPreview(Number(el.getAttribute('data-row')));
+});
+$('wdChk').addEventListener('change', function(){ $('wdGo').disabled = wdEarly && !$('wdChk').checked; });
+$('wdBack').addEventListener('click', wdShowList);
+$('wdClose').addEventListener('click', function(){ $('wd').classList.remove('open'); });
+$('wdGo').addEventListener('click', function(){
+  var t = loadToken();
+  if (!t || !hasBackend()){ say('wdMsg', 'Please sign in again.', false); return; }
+  if (wdEarly && !$('wdChk').checked){ say('wdMsg', 'Please tick the box to confirm.', false); return; }
+  $('wdGo').disabled = true; say('wdMsg', 'Sending...', true);
+  google.script.run
+    .withSuccessHandler(function(r){
+      if (r && r.success){
+        say('wdMsg', r.message, true);
+        refreshAccount();
+        setTimeout(function(){
+          $('wd').classList.remove('open');
+          say('pdMsg', 'Processing request. Our team will review it.', true);
+        }, 1500);
+      } else {
+        $('wdGo').disabled = false;
+        say('wdMsg', (r && r.message) || 'Request failed.', false);
+      }
+    })
+    .withFailureHandler(function(){ $('wdGo').disabled = false; say('wdMsg', 'Connection error.', false); })
+    .requestWithdrawal(t, wdRow, wdEarly ? $('wdChk').checked : false);
+});
+
+/* ---------- WIRING ---------- */
+$('mSign').addEventListener('click', function(){ openAuth('login'); });
+$('mReg').addEventListener('click', function(){ openAuth('register'); });
+$('mOut').addEventListener('click', function(){ consented = false; logout(); });
+$('pOut').addEventListener('click', function(){ consented = false; logout(); });
+$('pdOut').addEventListener('click', function(){ consented = false; logout(); });
+$('cta1').addEventListener('click', function(){
+  if (loggedIn){ $('calculator').scrollIntoView({behavior:'smooth'}); } else { openAuth('register'); }
+});
+$('cta2').addEventListener('click', openGateway);
+$('dGo').addEventListener('click', openGateway);
+$('qNew').addEventListener('click', openGateway);
+$('qCalc').addEventListener('click', function(){ $('calculator').scrollIntoView({behavior:'smooth'}); });
+$('qWd').addEventListener('click', openWithdraw);
+$('qRef').addEventListener('click', function(){ say('pdMsg', 'Refreshing...', true); refreshAccount(function(){ say('pdMsg', 'Up to date.', true); }); });
+$('tabLogin').addEventListener('click', function(){ setMode('login'); });
+$('tabReg').addEventListener('click', function(){ setMode('register'); });
+$('submit').addEventListener('click', submitAuth);
+$('cancel').addEventListener('click', closeAuth);
+
+/* ---------- INIT ---------- */
+$('fYear').textContent = new Date().getFullYear();
+renderTicker();
+renderProducts();
+calc();
+loadPrices();
+loadConfig();
+restore();
+</script>
+</body>
+</html>
