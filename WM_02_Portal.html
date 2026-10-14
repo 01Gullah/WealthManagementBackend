@@ -41,6 +41,7 @@ svg{display:block}
 .btn{padding:13px 16px;border-radius:14px;border:1px solid var(--mint);background:transparent;
   color:var(--mint);font-weight:700;font-size:15px}
 .btn.fill{background:var(--mint);color:#03130d}
+.wlbtn{margin-top:10px;width:100%;padding:9px;font-size:13px}
 
 .dash{display:none;margin:16px 16px 0;background:var(--card);border:1px solid var(--mint);border-radius:20px;padding:16px}
 .dash .top{display:flex;align-items:center;justify-content:space-between;gap:10px}
@@ -197,6 +198,11 @@ input[type=range]::-moz-range-thumb{width:48px;height:30px;border-radius:15px;ba
 .lgb h4:first-child{margin-top:0}
 .lgb p{margin:0 0 10px}
 
+.addr{background:#040714;border:1px dashed var(--mint);border-radius:12px;padding:12px;font-family:var(--mono);
+  font-size:12.5px;word-break:break-all;color:#fff;margin-bottom:12px;line-height:1.5}
+.wlrow{display:flex;justify-content:space-between;gap:10px;color:var(--mut);font-size:13px;margin-bottom:10px}
+.wlrow b{color:#fff;font-family:var(--mono)}
+
 #err{display:none;background:#7f1d1d;color:#fff;padding:10px 14px;font-size:12px;word-break:break-word}
 </style>
 </head>
@@ -303,8 +309,8 @@ input[type=range]::-moz-range-thumb{width:48px;height:30px;border-radius:15px;ba
 </div>
 
 <section class="hero">
-  <h1>The Simple &amp; Secure <span class="grad">Digital Wealth Platform</span></h1>
-  <p>Save, manage, and grow your wealth with ease. Enjoy secure custody of your digital assets, automated savings plans, and simple withdrawals at any time.</p>
+  <h1>The Simple &amp; Transparent <span class="grad">Digital Wealth Platform</span></h1>
+  <p>Plan your savings with clear terms, illustrative projections and simple withdrawal requests. Every plan shows its term, rate and early-withdrawal rules before you confirm.</p>
 </section>
 <button class="cta" id="cta1">Get Started Now
   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
@@ -315,18 +321,18 @@ input[type=range]::-moz-range-thumb{width:48px;height:30px;border-radius:15px;ba
 <section class="features" id="features">
   <div class="feat">
     <div class="ico"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/></svg></div>
-    <h3>Secure Asset Safety</h3>
-    <p>All funds are kept in secure, offline storage to guarantee that your account balance and digital assets remain safe at all times.</p>
+    <h3>Clear Risk Disclosure</h3>
+    <p>All investing involves risk, including loss of principal. Read each plan's terms, rate and early-withdrawal rules carefully before you confirm.</p>
   </div>
   <div class="feat">
     <div class="ico"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg></div>
-    <h3>Simple Savings Plans</h3>
-    <p>Earn steady and competitive returns on your digital assets automatically, with flexible options suited to your risk preferences.</p>
+    <h3>Transparent Plans</h3>
+    <p>Rates shown are illustrative and are not guaranteed. Projections are estimates only and actual results may be lower, or you may lose money.</p>
   </div>
   <div class="feat">
     <div class="ico"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="7" r="4"/><path d="M2 21v-2a5 5 0 0 1 5-5h4a5 5 0 0 1 5 5v2"/><path d="M16 3.1a4 4 0 0 1 0 7.8"/><path d="M22 21v-2a5 5 0 0 0-3-4.6"/></svg></div>
-    <h3>24/7 Personal Support</h3>
-    <p>Enjoy friendly, personalized assistance. Our dedicated support team is available 24 hours a day to answer your questions.</p>
+    <h3>Reviewed Requests</h3>
+    <p>Our team reviews every withdrawal request. Contact support through the details provided on the platform if you have a question.</p>
   </div>
 </section>
 
@@ -351,7 +357,7 @@ input[type=range]::-moz-range-thumb{width:48px;height:30px;border-radius:15px;ba
       <div class="big" id="outVal">$0.00</div>
       <div class="split">
         <div><small>Initial Principal</small><b id="outPrin">$0</b></div>
-        <div><small>Net Profit Yield</small><b class="g" id="outProfit">+$0.00</b></div>
+        <div><small>Projected Gain</small><b class="g" id="outProfit">+$0.00</b></div>
       </div>
     </div>
     <button class="go" id="cta2">Start Your Savings Plan
@@ -437,6 +443,27 @@ input[type=range]::-moz-range-thumb{width:48px;height:30px;border-radius:15px;ba
   </div>
 </div>
 
+<div class="modal" id="wl">
+  <div class="box">
+    <h3>Pay for your plan</h3>
+    <p class="gsub" id="wlSub">Loading...</p>
+    <div class="pdtag" id="wlTag"></div>
+    <div id="wlBody" style="display:none">
+      <div class="wlrow"><span>Order</span><b id="wlRef"></b></div>
+      <div class="wlrow"><span>Asset</span><b id="wlAsset"></b></div>
+      <div class="wlrow"><span>Exact amount</span><b id="wlAmt"></b></div>
+      <div class="flab">Send to this address</div>
+      <div class="addr" id="wlAddr"></div>
+      <div class="flab">Your transaction hash</div>
+      <input type="text" id="wlTx" placeholder="0x..." autocomplete="off" autocapitalize="off" spellcheck="false">
+      <p class="note" style="margin:0 0 12px">Submitting a hash does not confirm your plan. Our team reviews every submission.</p>
+    </div>
+    <div class="msg" id="wlMsg"></div>
+    <button class="go" id="wlGo" style="display:none">Submit hash for review</button>
+    <button class="cancel" id="wlClose">Close</button>
+  </div>
+</div>
+
 <div class="modal" id="wd">
   <div class="box">
     <h3>Withdraw</h3>
@@ -482,6 +509,22 @@ function hasBackend(){ return typeof google !== 'undefined' && google.script && 
 function clamp(v, lo, hi){ return Math.max(lo, Math.min(hi, v)); }
 function say(id, t, ok){ var e = $(id); e.textContent = t; e.style.color = ok ? '#34d399' : '#fb7185'; }
 function flagHtml(f){ return f ? '<span class="flag">' + esc(f) + '</span>' : ''; }
+
+/* ---------- LIVE TERM VALUES: {FEE} and {FORFEIT} in consent and Terms text ---------- */
+var termTok = {fee:'5', forfeit:'you lose the returns earned so far'};
+function tt(s){
+  return String(s).replace(/\{FEE\}/g, termTok.fee).replace(/\{FORFEIT\}/g, termTok.forfeit);
+}
+function withTokens(cb){
+  if (!hasBackend()){ cb(); return; }
+  google.script.run
+    .withSuccessHandler(function(r){
+      if (r && r.success){ termTok = {fee: r.fee, forfeit: r.forfeit}; }
+      cb();
+    })
+    .withFailureHandler(function(){ cb(); })
+    .getTermTokens();
+}
 
 /* ---------- SESSION ---------- */
 var TOKEN_KEY = 'apex_session';
@@ -696,6 +739,10 @@ function payInfo(p){
   return {t:'REQUEST RECEIVED', c:'', n:p.ref};
 }
 
+function wlBtn(row){
+  return '<button class="btn wlbtn" data-row="' + row + '">Pay / submit transaction hash</button>';
+}
+
 function renderRequests(list){
   if (!list || !list.length){
     $('reqList').innerHTML = '<div class="empty">No requests yet. Tap Start a savings plan.</div>';
@@ -710,9 +757,11 @@ function renderRequests(list){
     if (!gift && x.pay && x.status === 'PENDING') si = payInfo(x.pay);
     if (x.wd === 'PROCESSING') si = {t:'PROCESSING REQUEST', c:'', n:'Withdrawal under review'};
     else if (x.wd === 'ACCEPTED') si = {t:'WITHDRAWAL APPROVED', c:'ok', n:'Plan closed'};
+    var canPay = (!gift && x.status === 'PENDING' && x.pay && x.pay.status === 'PENDING' && !x.wd);
     h += '<div class="plan"><div class="r1"><span>' + esc(x.name) + flagHtml(x.flag) + '</span><span>' + fmt(x.amount, 2) + '</span></div>' +
          '<div class="r2"><span>' + ((gift && !x.months) ? 'Credit' : x.months + ' months') + '</span><span>' + esc(x.date) + '</span></div>' +
-         '<div class="r2"><span class="st ' + si.c + '">' + si.t + '</span><span>' + esc(si.n) + '</span></div></div>';
+         '<div class="r2"><span class="st ' + si.c + '">' + si.t + '</span><span>' + esc(si.n) + '</span></div>' +
+         (canPay ? wlBtn(x.row) : '') + '</div>';
   }
   $('reqList').innerHTML = h;
 }
@@ -748,9 +797,11 @@ function renderDashboard(res){
       rightTxt = 'Matures ' + esc(x.maturity);
     }
     var mid = noTerm ? '<span>Credit</span>' : '<span>' + x.months + ' mo \u00B7 ' + Math.round(x.apy * 10000) / 100 + '%</span>';
+    var canPay = (x.kind !== 'GIFT' && x.status === 'PENDING' && !x.wd);
     h += '<div class="plan"><div class="r1"><span>' + esc(x.name) + flagHtml(x.flag) + '</span><span>' + fmt(x.amount, 2) + '</span></div>' +
          '<div class="r2">' + mid + '<span style="color:#34d399">Now ' + fmt(x.value, 2) + '</span></div>' +
-         '<div class="r2"><span class="st ' + stCls + '">' + stTxt + '</span><span>' + rightTxt + '</span></div></div>';
+         '<div class="r2"><span class="st ' + stCls + '">' + stTxt + '</span><span>' + rightTxt + '</span></div>' +
+         (canPay ? wlBtn(x.row) : '') + '</div>';
   }
   $('pdPlans').innerHTML = h || '<div class="empty">No plans yet.</div>';
 
@@ -922,12 +973,12 @@ function renderConsent(c){
   var h = '';
   for (var i = 0; i < c.sections.length; i++){
     var s = c.sections[i];
-    h += '<p>' + (s.title ? '<b>' + nl(s.title) + '.</b> ' : '') + nl(s.text) + '</p>';
+    h += '<p>' + (s.title ? '<b>' + nl(tt(s.title)) + '.</b> ' : '') + nl(tt(s.text)) + '</p>';
   }
   $('legalText').innerHTML = h || '<p>Please confirm below.</p>';
   var k = '';
   for (var j = 0; j < c.checks.length; j++){
-    k += '<label class="chk"><input type="checkbox"><span>' + nl(c.checks[j].text) + '</span></label>';
+    k += '<label class="chk"><input type="checkbox"><span>' + nl(tt(c.checks[j].text)) + '</span></label>';
   }
   $('chkList').innerHTML = k;
   consentReady = true;
@@ -941,16 +992,18 @@ function openConsent(){
   $('cOk').disabled = true;
   $('consent').classList.add('open');
   if (!hasBackend()){ say('cMsg', 'Backend not available.', false); return; }
-  google.script.run
-    .withSuccessHandler(function(c){
-      if (c && c.success){ renderConsent(c); $('legalText').scrollTop = 0; }
-      else { $('legalText').textContent = ''; say('cMsg', (c && c.message) || 'Could not load the consent.', false); }
-    })
-    .withFailureHandler(function(){
-      $('legalText').textContent = '';
-      say('cMsg', 'Connection error. Close and try again.', false);
-    })
-    .getConsentContent();
+  withTokens(function(){
+    google.script.run
+      .withSuccessHandler(function(c){
+        if (c && c.success){ renderConsent(c); $('legalText').scrollTop = 0; }
+        else { $('legalText').textContent = ''; say('cMsg', (c && c.message) || 'Could not load the consent.', false); }
+      })
+      .withFailureHandler(function(){
+        $('legalText').textContent = '';
+        say('cMsg', 'Connection error. Close and try again.', false);
+      })
+      .getConsentContent();
+  });
 }
 $('chkList').addEventListener('change', updateConsentBtn);
 $('cNo').addEventListener('click', function(){ $('consent').classList.remove('open'); });
@@ -980,23 +1033,25 @@ function openLegal(page){
   $('lgBody').textContent = 'Loading...';
   $('lg').classList.add('open');
   if (!hasBackend()){ $('lgBody').textContent = 'Backend not available.'; return; }
-  google.script.run
-    .withSuccessHandler(function(r){
-      if (r && r.success){
-        $('lgTitle').textContent = r.title;
-        var h = '';
-        for (var i = 0; i < r.items.length; i++){
-          var it = r.items[i];
-          h += (it.type === 'HEADING') ? '<h4>' + nl(it.text) + '</h4>' : '<p>' + nl(it.text) + '</p>';
+  withTokens(function(){
+    google.script.run
+      .withSuccessHandler(function(r){
+        if (r && r.success){
+          $('lgTitle').textContent = r.title;
+          var h = '';
+          for (var i = 0; i < r.items.length; i++){
+            var it = r.items[i];
+            h += (it.type === 'HEADING') ? '<h4>' + nl(tt(it.text)) + '</h4>' : '<p>' + nl(tt(it.text)) + '</p>';
+          }
+          $('lgBody').innerHTML = h;
+          $('lgBody').scrollTop = 0;
+        } else {
+          $('lgBody').textContent = (r && r.message) || 'Could not load this page.';
         }
-        $('lgBody').innerHTML = h;
-        $('lgBody').scrollTop = 0;
-      } else {
-        $('lgBody').textContent = (r && r.message) || 'Could not load this page.';
-      }
-    })
-    .withFailureHandler(function(){ $('lgBody').textContent = 'Connection error. Close and try again.'; })
-    .getLegalPage(page);
+      })
+      .withFailureHandler(function(){ $('lgBody').textContent = 'Connection error. Close and try again.'; })
+      .getLegalPage(page);
+  });
 }
 function bindLegal(id, page){
   $(id).addEventListener('click', function(ev){ ev.preventDefault(); openLegal(page); });
@@ -1128,6 +1183,72 @@ $('gPay').addEventListener('click', function(){
     .withFailureHandler(function(){ $('gPay').disabled = false; say('gMsg', 'Connection error.', false); })
     .submitLiveInterest(t, gSel, amt, Number($('gTerm').value), method);
 });
+
+/* ---------- PAY / SUBMIT TRANSACTION HASH (test mode wallet flow) ---------- */
+var wlRow = 0;
+function openWallet(row){
+  var t = loadToken();
+  if (!t || !hasBackend()){ openAuth('login'); return; }
+  wlRow = row;
+  $('wlSub').textContent = 'Loading...';
+  $('wlTag').style.display = 'none';
+  $('wlBody').style.display = 'none';
+  $('wlGo').style.display = 'none';
+  $('wlGo').disabled = false;
+  $('wlTx').value = '';
+  $('wlMsg').textContent = '';
+  $('wl').classList.add('open');
+  google.script.run
+    .withSuccessHandler(function(r){
+      if (!r || !r.success){
+        $('wlSub').textContent = '';
+        say('wlMsg', (r && r.message) || 'Could not load payment details.', false);
+        return;
+      }
+      $('wlSub').textContent = 'Follow the steps below, then submit your transaction hash.';
+      $('wlRef').textContent = r.ref;
+      $('wlAsset').textContent = r.asset;
+      $('wlAmt').textContent = r.amount + ' USD';
+      $('wlAddr').textContent = r.address;
+      var tg = $('wlTag');
+      tg.textContent = r.note;
+      tg.style.display = 'block';
+      $('wlBody').style.display = 'block';
+      $('wlGo').style.display = 'block';
+    })
+    .withFailureHandler(function(){ $('wlSub').textContent = ''; say('wlMsg', 'Connection error.', false); })
+    .getWalletInstructions(t, row);
+}
+$('wlGo').addEventListener('click', function(){
+  var t = loadToken();
+  if (!t || !hasBackend()){ say('wlMsg', 'Please sign in again.', false); return; }
+  var tx = $('wlTx').value.trim();
+  if (!tx){ say('wlMsg', 'Enter your transaction hash.', false); return; }
+  $('wlGo').disabled = true; say('wlMsg', 'Sending...', true);
+  google.script.run
+    .withSuccessHandler(function(r){
+      if (r && r.success){
+        say('wlMsg', r.message, true);
+        refreshAccount();
+        setTimeout(function(){ $('wl').classList.remove('open'); }, 1600);
+      } else {
+        $('wlGo').disabled = false;
+        say('wlMsg', (r && r.message) || 'Request failed.', false);
+      }
+    })
+    .withFailureHandler(function(){ $('wlGo').disabled = false; say('wlMsg', 'Connection error.', false); })
+    .submitTxid(t, wlRow, tx);
+});
+$('wlClose').addEventListener('click', function(){ $('wl').classList.remove('open'); });
+function bindWl(id){
+  $(id).addEventListener('click', function(ev){
+    var b = ev.target.closest ? ev.target.closest('.wlbtn') : null;
+    if (!b) return;
+    openWallet(Number(b.getAttribute('data-row')));
+  });
+}
+bindWl('reqList');
+bindWl('pdPlans');
 
 /* ---------- WITHDRAW (request only; the team reviews every request) ---------- */
 var wdRow = 0, wdEarly = false;
